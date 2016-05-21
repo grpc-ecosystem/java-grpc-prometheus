@@ -69,7 +69,7 @@ maven_jar(
 
 maven_jar(
   name = "prometheus_client_artifact",
-  artifact = "io.prometheus:client:0.0.10",
+  artifact = "io.prometheus:simpleclient:0.0.14",
 )
   
 maven_jar(

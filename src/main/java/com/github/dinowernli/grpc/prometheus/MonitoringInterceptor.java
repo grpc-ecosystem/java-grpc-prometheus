@@ -24,7 +24,7 @@ public class MonitoringInterceptor implements ServerInterceptor {
       ServerCallHandler<R, S> next) {
     return next.startCall(
         method,
-        new MonitoringForwardingServerCall<S>(call, clock),
+        new MonitoringForwardingServerCall<S>(call, clock, method.getFullMethodName()),
         requestHeaders);
   }
 }
