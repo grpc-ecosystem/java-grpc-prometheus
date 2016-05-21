@@ -68,6 +68,11 @@ maven_jar(
 )
 
 maven_jar(
+  name = "prometheus_client_artifact",
+  artifact = "io.prometheus:client:0.0.10",
+)
+  
+maven_jar(
   name = "truth_artifact",
   artifact = "com.google.truth:truth:0.28",
 )
