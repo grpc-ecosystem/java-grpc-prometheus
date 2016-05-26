@@ -23,8 +23,6 @@ public class MonitoringInterceptor implements ServerInterceptor {
       Metadata requestHeaders,
       ServerCallHandler<R, S> next) {
     return next.startCall(
-        method,
-        new MonitoringForwardingServerCall<S>(call, clock, method.getFullMethodName()),
-        requestHeaders);
+        method, MonitoringForwardingServerCall.create(call, clock, method), requestHeaders);
   }
 }
