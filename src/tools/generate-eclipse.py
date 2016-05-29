@@ -1,5 +1,7 @@
 #! /usr/bin/env python
 
+# Copyright 2016 Dino Wernli. All Rights Reserved. See LICENSE for licensing terms.
+
 import os
 import subprocess
 from xml.etree.ElementTree import Element, SubElement, tostring
