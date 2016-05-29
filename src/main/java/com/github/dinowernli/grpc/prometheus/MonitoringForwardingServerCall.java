@@ -4,6 +4,9 @@ package com.github.dinowernli.grpc.prometheus;
 
 import java.time.Clock;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 import io.grpc.ForwardingServerCall;
@@ -125,13 +128,9 @@ class MonitoringForwardingServerCall<S> extends ForwardingServerCall.SimpleForwa
   }
 
   private <T> T addLabels(SimpleCollector<T> collector, String... labels) {
-    String[] allLabels = new String[labels.length + 3];
-    allLabels[0] = methodType.toString();
-    allLabels[1] = serviceName;
-    allLabels[2] = methodName;
-    for (int i = 0; i < labels.length; ++i) {
-      allLabels[i + 3] = labels[i];
-    }
-    return collector.labels(allLabels);
+    List<String> allLabels = new ArrayList<>();
+    Collections.addAll(allLabels, methodType.toString(), serviceName, methodName);
+    Collections.addAll(allLabels, labels);
+    return collector.labels(allLabels.toArray(new String[0]));
   }
 }
