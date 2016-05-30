@@ -122,9 +122,9 @@ class MonitoringForwardingServerCall<S> extends ForwardingServerCall.SimpleForwa
   private void reportEndMetrics(Status status) {
     String codeString = status.getCode().toString();
     double latencySeconds =
-        clock.millis() - startInstant.get().toEpochMilli() / (double) MILLIS_PER_SECOND;
+        (clock.millis() - startInstant.get().toEpochMilli()) / (double) MILLIS_PER_SECOND;
     addLabels(serverHandledCounter, codeString).inc();
-    addLabels(serverHandledLatencySecondsHistogram, codeString).observe(latencySeconds);
+    addLabels(serverHandledLatencySecondsHistogram).observe(latencySeconds);
   }
 
   private <T> T addLabels(SimpleCollector<T> collector, String... labels) {

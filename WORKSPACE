@@ -58,8 +58,23 @@ maven_jar(
 )
 
 maven_jar(
+  name = "netty_artifact",
+  artifact = "io.netty:netty-all:4.1.0.CR3",
+)
+
+maven_jar(
   name = "prometheus_client_artifact",
   artifact = "io.prometheus:simpleclient:0.0.14",
+)
+
+maven_jar(
+  name = "prometheus_client_common_artifact",
+  artifact = "io.prometheus:simpleclient_common:0.0.14",
+)
+
+maven_jar(
+  name = "prometheus_client_servlet_artifact",
+  artifact = "io.prometheus:simpleclient_servlet:0.0.14",
 )
   
 maven_jar(
@@ -67,3 +82,12 @@ maven_jar(
   artifact = "com.google.truth:truth:0.28",
 )
 
+maven_jar(
+  name = "jetty_all_server_artifact",
+  artifact = "org.eclipse.jetty.aggregate:jetty-all-server:8.1.7.v20120910",
+)
+
+maven_jar(
+  name = "javax_servlet_api_artifact",
+  artifact = "javax.servlet:javax.servlet-api:3.1.0",
+)

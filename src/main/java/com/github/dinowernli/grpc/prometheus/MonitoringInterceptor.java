@@ -14,6 +14,10 @@ import io.grpc.ServerInterceptor;
 public class MonitoringInterceptor implements ServerInterceptor {
   private final Clock clock;
 
+  public static MonitoringInterceptor create() {
+    return new MonitoringInterceptor(Clock.systemDefaultZone());
+  }
+
   public MonitoringInterceptor(Clock clock) {
     this.clock = clock;
   }
