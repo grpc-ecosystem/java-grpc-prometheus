@@ -12,7 +12,7 @@ public class HelloServiceImpl implements HelloService {
    * Indicates how many request messages we wait for before responding to the client in the case of
    * the client streamed method.
    */
-  private static final int CLIENT_STREAM_NUM_REQUESTS = 5;
+  private static final int CLIENT_STREAM_NUM_REQUESTS = 3;
 
   @Override
   public void sayHello(HelloRequest request, StreamObserver<HelloResponse> responseObserver) {

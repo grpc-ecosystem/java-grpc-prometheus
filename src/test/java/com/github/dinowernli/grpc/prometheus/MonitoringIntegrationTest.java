@@ -19,20 +19,24 @@ import org.junit.Test;
 
 import com.github.dinowernli.grpc.prometheus.MonitoringInterceptor.Configuration;
 import com.github.dinowernli.grpc.prometheus.testing.HelloServiceImpl;
+import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.io.CharStreams;
 
-import io.grpc.Channel;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
 import io.grpc.ServerInterceptors;
 import io.grpc.netty.NegotiationType;
 import io.grpc.netty.NettyChannelBuilder;
+import io.grpc.stub.StreamObserver;
 import io.prometheus.client.exporter.MetricsServlet;
+import polyglot.HelloProto;
 import polyglot.HelloProto.HelloRequest;
+import polyglot.HelloProto.HelloResponse;
 import polyglot.HelloServiceGrpc;
-import polyglot.HelloServiceGrpc.HelloServiceFutureStub;
+import polyglot.HelloServiceGrpc.HelloServiceBlockingStub;
+import polyglot.HelloServiceGrpc.HelloServiceStub;
 
 public class MonitoringIntegrationTest {
   private static final String METRICS_SERVLET_ROOT = "/";
@@ -62,37 +66,36 @@ public class MonitoringIntegrationTest {
 
   @Test
   public void unaryRpcMetrics() throws Throwable {
-    createGrpcFutureStub().sayHello(REQUEST).get();
-    ImmutableList<String> metricsLines = fetchMetricsPageLines();
+    createGrpcBlockingStub().sayHello(REQUEST);
 
+    ImmutableList<String> metricsLines = fetchMetricsPageLines();
     assertTrue(Iterables.any(metricsLines, (String line) -> {
-      return containsAll(line, "grpc_server_msg_received_total", "UNARY", "1.0", "HelloService");
+      return containsAll(line, "grpc_server_msg_received_total", "UNARY", "HelloService", "1.0");
     }));
     assertTrue(Iterables.any(metricsLines, (String line) -> {
-      return containsAll(line, "grpc_server_handled_total", "UNARY", "1.0", "HelloService", "1.0");
+      return containsAll(line, "grpc_server_handled_total", "UNARY", "HelloService", "1.0");
+    }));
+  }
+
+  @Test
+  public void clientStreamRpcMetrics() throws Throwable {
+    StreamObserver<HelloRequest> requestStream =
+        createGrpcStub().sayHelloClientStream(ignoreResponse());
+    requestStream.onNext(REQUEST);
+    requestStream.onNext(REQUEST);
+    requestStream.onNext(REQUEST);
+
+    ImmutableList<String> metricsLines = fetchMetricsPageLines();
+    assertTrue(formatLines(metricsLines), Iterables.any(metricsLines, (String line) -> {
+      return containsAll(line, "grpc_server_msg_received_total", "CLIENT_STREAMING");
     }));
   }
 
   @Test
   public void doesNotAddHistogramsIfDisabled() throws Throwable {
-    createGrpcFutureStub().sayHello(REQUEST).get();
+    createGrpcBlockingStub().sayHello(REQUEST);
 
     // TODO(dino): Add plumbing for disabling histograms in the test.
-  }
-
-  private static boolean containsAll(String subject, String... contents) {
-    return ImmutableList.copyOf(contents).stream()
-        .allMatch((String content) -> subject.contains(content));
-  }
-
-  private static HelloServiceFutureStub createGrpcFutureStub() {
-    return HelloServiceGrpc.newFutureStub(newGrpcChannel());
-  }
-
-  private static Channel newGrpcChannel() {
-    return NettyChannelBuilder.forAddress("localhost", GRPC_PORT)
-        .negotiationType(NegotiationType.PLAINTEXT)
-        .build();
   }
 
   private void startGrpcServer() {
@@ -144,5 +147,43 @@ public class MonitoringIntegrationTest {
     } catch (MalformedURLException e) {
       throw new RuntimeException("Could not create URL to metrics servlet", e);
     }
+  }
+
+  private static boolean containsAll(String subject, String... contents) {
+    return ImmutableList.copyOf(contents).stream()
+        .allMatch((String content) -> subject.contains(content));
+  }
+
+
+  private static HelloServiceBlockingStub createGrpcBlockingStub() {
+    return HelloServiceGrpc.newBlockingStub(NettyChannelBuilder.forAddress("localhost", GRPC_PORT)
+        .negotiationType(NegotiationType.PLAINTEXT)
+        .build());
+  }
+
+  private static HelloServiceStub createGrpcStub() {
+    return HelloServiceGrpc.newStub(NettyChannelBuilder.forAddress("localhost", GRPC_PORT)
+        .negotiationType(NegotiationType.PLAINTEXT)
+        .build());
+  }
+
+  private static String formatLines(Iterable<String> lines) {
+    return ">>>" + Joiner.on("\n>>>").join(lines);
+  }
+
+  private static StreamObserver<HelloResponse> ignoreResponse() {
+    return new StreamObserver<HelloProto.HelloResponse>() {
+      @Override
+      public void onCompleted() {
+      }
+
+      @Override
+      public void onError(Throwable arg0) {
+      }
+
+      @Override
+      public void onNext(HelloProto.HelloResponse arg0) {
+      }
+    };
   }
 }
