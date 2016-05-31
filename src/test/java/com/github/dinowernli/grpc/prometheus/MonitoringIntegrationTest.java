@@ -2,7 +2,7 @@
 
 package com.github.dinowernli.grpc.prometheus;
 
-import static com.google.common.truth.Truth.assertThat;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -20,6 +20,7 @@ import org.junit.Test;
 import com.github.dinowernli.grpc.prometheus.MonitoringInterceptor.Configuration;
 import com.github.dinowernli.grpc.prometheus.testing.HelloServiceImpl;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
 import com.google.common.io.CharStreams;
 
 import io.grpc.Channel;
@@ -30,8 +31,8 @@ import io.grpc.netty.NegotiationType;
 import io.grpc.netty.NettyChannelBuilder;
 import io.prometheus.client.exporter.MetricsServlet;
 import polyglot.HelloProto.HelloRequest;
-import polyglot.HelloProto.HelloResponse;
 import polyglot.HelloServiceGrpc;
+import polyglot.HelloServiceGrpc.HelloServiceFutureStub;
 
 public class MonitoringIntegrationTest {
   private static final String METRICS_SERVLET_ROOT = "/";
@@ -60,29 +61,43 @@ public class MonitoringIntegrationTest {
   }
 
   @Test
-  @Deprecated
-  public void testSomething() throws Throwable {
-    HelloResponse response =
-        HelloServiceGrpc.newFutureStub(newGrpcChannel()).sayHello(REQUEST).get();
-    assertThat(response.getMessage()).isEqualTo("Hello, " + RECIPIENT);
+  public void unaryRpcMetrics() throws Throwable {
+    createGrpcFutureStub().sayHello(REQUEST).get();
+    ImmutableList<String> metricsLines = fetchMetricsPageLines();
+
+    assertTrue(Iterables.any(metricsLines, (String line) -> {
+      return containsAll(line, "grpc_server_msg_received_total", "UNARY", "1.0", "HelloService");
+    }));
+    assertTrue(Iterables.any(metricsLines, (String line) -> {
+      return containsAll(line, "grpc_server_handled_total", "UNARY", "1.0", "HelloService", "1.0");
+    }));
   }
 
   @Test
-  public void testUnaryHappyCase() throws Throwable {
-    HelloServiceGrpc.newFutureStub(newGrpcChannel()).sayHello(REQUEST).get();
+  public void doesNotAddHistogramsIfDisabled() throws Throwable {
+    createGrpcFutureStub().sayHello(REQUEST).get();
 
-    ImmutableList<String> metricsLines = fetchMetricsPageLines();
-    assertThat(metricsLines.isEmpty()).isFalse();
+    // TODO(dino): Add plumbing for disabling histograms in the test.
   }
 
-  private Channel newGrpcChannel() {
+  private static boolean containsAll(String subject, String... contents) {
+    return ImmutableList.copyOf(contents).stream()
+        .allMatch((String content) -> subject.contains(content));
+  }
+
+  private static HelloServiceFutureStub createGrpcFutureStub() {
+    return HelloServiceGrpc.newFutureStub(newGrpcChannel());
+  }
+
+  private static Channel newGrpcChannel() {
     return NettyChannelBuilder.forAddress("localhost", GRPC_PORT)
         .negotiationType(NegotiationType.PLAINTEXT)
         .build();
   }
 
   private void startGrpcServer() {
-    MonitoringInterceptor interceptor = MonitoringInterceptor.create(Configuration.cheapMetricsOnly());
+    MonitoringInterceptor interceptor =
+        MonitoringInterceptor.create(Configuration.cheapMetricsOnly());
     grpcServer = ServerBuilder.forPort(GRPC_PORT)
         .addService(ServerInterceptors.intercept(
             HelloServiceGrpc.bindService(new HelloServiceImpl()), interceptor))
