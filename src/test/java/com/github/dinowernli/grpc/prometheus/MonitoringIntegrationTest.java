@@ -82,7 +82,7 @@ public class MonitoringIntegrationTest {
   }
 
   private void startGrpcServer() {
-    MonitoringInterceptor interceptor = MonitoringInterceptor.create(Configuration.defaultConfig());
+    MonitoringInterceptor interceptor = MonitoringInterceptor.create(Configuration.cheapMetricsOnly());
     grpcServer = ServerBuilder.forPort(GRPC_PORT)
         .addService(ServerInterceptors.intercept(
             HelloServiceGrpc.bindService(new HelloServiceImpl()), interceptor))

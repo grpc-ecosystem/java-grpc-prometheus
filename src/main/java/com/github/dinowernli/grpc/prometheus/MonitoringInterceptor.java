@@ -44,17 +44,17 @@ public class MonitoringInterceptor implements ServerInterceptor {
   public static class Configuration {
     private final boolean isIncludeLatencyHistograms;
 
-    /**
-     * Returns a default {@link Configuration}. By default, we keep track of a few reasonable and
-     * cheap metrics.
-     */
-    public static Configuration defaultConfig() {
+    /** Returns a {@link Configuration} for recording all cheap metrics about the rpcs. */
+    public static Configuration cheapMetricsOnly() {
       return new Configuration(false /* isIncludeLatencyHistograms */);
     }
 
-    /** Returns a copy of this {@link Configuration} which includes latency histograms. */
-    public Configuration withLatencyHistograms() {
-      return new Configuration(true /* isIncludeLatencyHistograms */);
+    /**
+     * Returns a {@link Configuration} for recording all metrics about the rpcs. This includes
+     * metrics which might produce a lot of data, such as latency histograms.
+     */
+    public static Configuration allMetrics() {
+      return new Configuration(false /* isIncludeLatencyHistograms */);
     }
 
     /** Returns whether or not latency histograms for calls should be included. */
