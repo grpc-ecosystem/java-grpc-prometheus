@@ -30,6 +30,7 @@ import io.grpc.ServerInterceptors;
 import io.grpc.netty.NegotiationType;
 import io.grpc.netty.NettyChannelBuilder;
 import io.grpc.stub.StreamObserver;
+import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.exporter.MetricsServlet;
 import polyglot.HelloProto;
 import polyglot.HelloProto.HelloRequest;
@@ -66,10 +67,11 @@ public class MonitoringInterceptorIntegrationTest {
 
   @Before
   public void setUp() {
-    // TODO(dino): Make sure that each test gets a fresh counter state.
-
     startMetricServer();
     startGrpcServer();
+
+    // TODO(dino): Add support for plumbing a custom collector registry into the interceptor.
+    CollectorRegistry.defaultRegistry.clear();
   }
 
   @After

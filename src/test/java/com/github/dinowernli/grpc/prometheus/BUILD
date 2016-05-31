@@ -9,6 +9,7 @@ java_test(
     "//third_party/grpc",
     "//third_party/guava",
     "//third_party/netty",
+    "//third_party/prometheus",
     "//third_party/prometheus:servlet",
     "//third_party/testing",
   ],

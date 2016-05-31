@@ -73,6 +73,11 @@ public class HelloServiceImpl implements HelloService {
 
       @Override
       public void onNext(HelloRequest request) {
+
+
+        System.out.println("Handling request: " + request);
+
+
         ++numReceivedRequests;
         if (numReceivedRequests >= CLIENT_STREAM_NUM_REQUESTS) {
           responseStream.onNext(responseForRequest(request));
