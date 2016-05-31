@@ -17,6 +17,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.github.dinowernli.grpc.prometheus.MonitoringInterceptor.Configuration;
 import com.github.dinowernli.grpc.prometheus.testing.HelloServiceImpl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.io.CharStreams;
@@ -81,10 +82,10 @@ public class MonitoringIntegrationTest {
   }
 
   private void startGrpcServer() {
-    MonitoringInterceptor monitoringInterceptor = MonitoringInterceptor.create();
+    MonitoringInterceptor interceptor = MonitoringInterceptor.create(Configuration.defaultConfig());
     grpcServer = ServerBuilder.forPort(GRPC_PORT)
         .addService(ServerInterceptors.intercept(
-            HelloServiceGrpc.bindService(new HelloServiceImpl()), monitoringInterceptor))
+            HelloServiceGrpc.bindService(new HelloServiceImpl()), interceptor))
         .build();
     try {
       grpcServer.start();

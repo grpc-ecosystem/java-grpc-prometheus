@@ -6,6 +6,8 @@ import java.time.Clock;
 import java.time.Instant;
 import java.util.Optional;
 
+import com.github.dinowernli.grpc.prometheus.MonitoringInterceptor.Configuration;
+
 import io.grpc.ForwardingServerCall;
 import io.grpc.Metadata;
 import io.grpc.MethodDescriptor.MethodType;
@@ -22,6 +24,7 @@ class MonitoringForwardingServerCall<S> extends ForwardingServerCall.SimpleForwa
   private final Clock clock;
   private final MethodType methodType;
   private final MetricHelper metricHelper;
+  private final Configuration configuration;
 
   private final Optional<Instant> startInstant;
 
@@ -29,11 +32,13 @@ class MonitoringForwardingServerCall<S> extends ForwardingServerCall.SimpleForwa
       ServerCall<S> delegate,
       Clock clock,
       MethodType methodType,
-      MetricHelper metricHelper) {
+      MetricHelper metricHelper,
+      Configuration configuration) {
     super(delegate);
     this.clock = clock;
     this.methodType = methodType;
     this.metricHelper = metricHelper;
+    this.configuration = configuration;
     this.startInstant = Optional.of(clock.instant());
 
     // TODO(dino): Consider doing this in the onReady() method of the listener instead.
@@ -60,9 +65,14 @@ class MonitoringForwardingServerCall<S> extends ForwardingServerCall.SimpleForwa
 
   private void reportEndMetrics(Status status) {
     String codeString = status.getCode().toString();
-    double latencySec =
-        (clock.millis() - startInstant.get().toEpochMilli()) / (double) MILLIS_PER_SECOND;
     metricHelper.addLabels(ServerMetrics.serverHandledCounter, codeString).inc();
-    metricHelper.addLabels(ServerMetrics.serverHandledLatencySecondsHistogram).observe(latencySec);
+
+    if (configuration.isIncludeLatencyHistograms()) {
+      double latencySec =
+          (clock.millis() - startInstant.get().toEpochMilli()) / (double) MILLIS_PER_SECOND;
+      metricHelper
+          .addLabels(ServerMetrics.serverHandledLatencySecondsHistogram)
+          .observe(latencySec);
+    }
   }
 }
