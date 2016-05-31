@@ -38,7 +38,19 @@ import polyglot.HelloServiceGrpc;
 import polyglot.HelloServiceGrpc.HelloServiceBlockingStub;
 import polyglot.HelloServiceGrpc.HelloServiceStub;
 
-public class MonitoringIntegrationTest {
+/**
+ * Integrations tests which make sure that if a service is started with a
+ * {@link MonitoringInterceptor}, then all Prometheus metrics get recorded correctly.
+ *
+ * The basic structure of each test is:
+ *   1) Start a Prometheus metrics servlet.
+ *   2) Start a grpc server which implements an instrumented grpc service.
+ *   3) Make some grpc requests to the server.
+ *   4) Fetch the metrics served by the servlet and check that the right metrics were incremented.
+ *
+ * Note that each single test gets a completely fresh set of servers and metrics.
+ */
+public class MonitoringInterceptorIntegrationTest {
   private static final String METRICS_SERVLET_ROOT = "/";
   private static final String METRICS_PATH = "/metrics";
   private static final int METRICS_SERVLET_PORT = 12346;
@@ -54,6 +66,8 @@ public class MonitoringIntegrationTest {
 
   @Before
   public void setUp() {
+    // TODO(dino): Make sure that each test gets a fresh counter state.
+
     startMetricServer();
     startGrpcServer();
   }
@@ -149,6 +163,7 @@ public class MonitoringIntegrationTest {
     }
   }
 
+  // TOOD(dino): Write a Truth matcher for an object which wraps metric lines.
   private static boolean containsAll(String subject, String... contents) {
     return ImmutableList.copyOf(contents).stream()
         .allMatch((String content) -> subject.contains(content));
