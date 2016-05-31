@@ -4,98 +4,39 @@ package com.github.dinowernli.grpc.prometheus;
 
 import java.time.Clock;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
 
 import io.grpc.ForwardingServerCall;
 import io.grpc.Metadata;
-import io.grpc.MethodDescriptor;
 import io.grpc.MethodDescriptor.MethodType;
 import io.grpc.ServerCall;
 import io.grpc.Status;
-import io.prometheus.client.Counter;
-import io.prometheus.client.Histogram;
-import io.prometheus.client.SimpleCollector;
 
 /**
- * A {@link ForwardingServerCall} which keeps track of relevant stats for a single call and
- * reports them to Prometheus.
+ * A {@link ForwardingServerCall} which update Prometheus metrics based on the server-side actions
+ * taken for a single rpc, e.g., messages sent, latency, etc.
  */
 class MonitoringForwardingServerCall<S> extends ForwardingServerCall.SimpleForwardingServerCall<S> {
   private static final long MILLIS_PER_SECOND = 1000L;
 
-  private static final Counter serverStartedCounter = Counter.build()
-      .namespace("grpc")
-      .subsystem("server")
-      .name("started_total")
-      .labelNames("grpc_type", "grpc_service", "grpc_method")
-      .help("Total number of RPCs started on the server.")
-      .register();
-
-  private static final Counter serverHandledCounter = Counter.build()
-      .namespace("grpc")
-      .subsystem("server")
-      .name("handled_total")
-      .labelNames("grpc_type", "grpc_service", "grpc_method", "code")
-      .help("Total number of RPCs completed on the server, regardless of success or failure.")
-      .register();
-
-  private static final Histogram serverHandledLatencySecondsHistogram = Histogram.build()
-      .namespace("grpc")
-      .subsystem("server")
-      .name("handled_total")
-      .labelNames("grpc_type", "grpc_service", "grpc_method")
-      .help("Histogram of response latency (seconds) of gRPC that had been application-level " +
-          "handled by the server.")
-      .register();
-
-  private static final Counter serverStreamMessagesReceived = Counter.build()
-      .namespace("grpc")
-      .subsystem("server")
-      .name("msg_received_total")
-      .labelNames("grpc_type", "grpc_service", "grpc_method")
-      .help("Total number of RPCs started on the server.")
-      .register();
-
-  private static final Counter serverStreamMessagesSent = Counter.build()
-      .namespace("grpc")
-      .subsystem("server")
-      .name("msg_received_total")
-      .labelNames("grpc_type", "grpc_service", "grpc_method")
-      .help("Total number of gRPC stream messages sent by the server.")
-      .register();
-
-
   private final Clock clock;
-  private final String methodName;
   private final MethodType methodType;
-  private final String serviceName;
+  private final MetricHelper metricHelper;
 
   private final Optional<Instant> startInstant;
 
-  public static <R, S> ServerCall<S> create(
-      ServerCall<S> call, Clock clock, MethodDescriptor<R, S> method) {
-    String serviceName = MethodDescriptor.extractFullServiceName(method.getFullMethodName());
-    String methodName = method.getFullMethodName();
-    return new MonitoringForwardingServerCall<S>(
-        call, clock, methodName, serviceName, method.getType());
-  }
-
   MonitoringForwardingServerCall(
-      ServerCall<S> call,
+      ServerCall<S> delegate,
       Clock clock,
-      String methodName,
-      String serviceName,
-      MethodType methodType) {
-    super(call);
+      MethodType methodType,
+      MetricHelper metricHelper) {
+    super(delegate);
     this.clock = clock;
-    this.methodName = methodName;
-    this.serviceName = serviceName;
     this.methodType = methodType;
+    this.metricHelper = metricHelper;
     this.startInstant = Optional.of(clock.instant());
 
+    // TODO(dino): Consider doing this in the onReady() method of the listener instead.
     reportStartMetrics();
   }
 
@@ -108,29 +49,20 @@ class MonitoringForwardingServerCall<S> extends ForwardingServerCall.SimpleForwa
   @Override
   public void sendMessage(S message) {
     if (methodType == MethodType.SERVER_STREAMING || methodType == MethodType.BIDI_STREAMING) {
-      addLabels(serverStreamMessagesSent).inc();
+      metricHelper.addLabels(ServerMetrics.serverStreamMessagesSent).inc();
     }
     super.sendMessage(message);
-
-    // TODO(dino): Figure out how to count the number of messages received.
   }
 
   private void reportStartMetrics() {
-    addLabels(serverStartedCounter).inc();
+    metricHelper.addLabels(ServerMetrics.serverStartedCounter).inc();
   }
 
   private void reportEndMetrics(Status status) {
     String codeString = status.getCode().toString();
-    double latencySeconds =
+    double latencySec =
         (clock.millis() - startInstant.get().toEpochMilli()) / (double) MILLIS_PER_SECOND;
-    addLabels(serverHandledCounter, codeString).inc();
-    addLabels(serverHandledLatencySecondsHistogram).observe(latencySeconds);
-  }
-
-  private <T> T addLabels(SimpleCollector<T> collector, String... labels) {
-    List<String> allLabels = new ArrayList<>();
-    Collections.addAll(allLabels, methodType.toString(), serviceName, methodName);
-    Collections.addAll(allLabels, labels);
-    return collector.labels(allLabels.toArray(new String[0]));
+    metricHelper.addLabels(ServerMetrics.serverHandledCounter, codeString).inc();
+    metricHelper.addLabels(ServerMetrics.serverHandledLatencySecondsHistogram).observe(latencySec);
   }
 }

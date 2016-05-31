@@ -10,7 +10,7 @@ import io.grpc.ServerCall;
 import io.grpc.ServerCallHandler;
 import io.grpc.ServerInterceptor;
 
-/** An interceptor which send stats about the rpcs to Prometheus. */
+/** An interceptor which sends stats about incoming grpc calls to Prometheus. */
 public class MonitoringInterceptor implements ServerInterceptor {
   private final Clock clock;
 
@@ -28,7 +28,10 @@ public class MonitoringInterceptor implements ServerInterceptor {
       ServerCall<S> call,
       Metadata requestHeaders,
       ServerCallHandler<R, S> next) {
-    return next.startCall(
-        method, MonitoringForwardingServerCall.create(call, clock, method), requestHeaders);
+    MetricHelper metricHelper = MetricHelper.create(method);
+    ServerCall<S> monitoringCall =
+        new MonitoringForwardingServerCall<S>(call, clock, method.getType(), metricHelper);
+    return new MonitoringForwardingServerCallListener<R>(
+        next.startCall(method, monitoringCall, requestHeaders), metricHelper);
   }
 }
