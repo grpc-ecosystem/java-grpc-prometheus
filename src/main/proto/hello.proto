@@ -6,6 +6,10 @@ option java_outer_classname = "HelloProto";
 
 message HelloRequest {
   string recipient = 1;
+
+  // If set, an error is returned (defined as anything with grpc status other
+  // than OK).
+  bool throw_exception = 2;
 }
 
 message HelloResponse {
@@ -14,5 +18,7 @@ message HelloResponse {
 
 service HelloService {
   rpc SayHello (HelloRequest) returns (HelloResponse) {}
-  rpc SayHelloStream (HelloRequest) returns (stream HelloResponse) {}
+  rpc SayHelloServerStream (HelloRequest) returns (stream HelloResponse) {}
+  rpc SayHelloClientStream (stream HelloRequest) returns (HelloResponse) {}
+  rpc SayHelloBidiStream (stream HelloRequest) returns (stream HelloResponse) {}
 }
