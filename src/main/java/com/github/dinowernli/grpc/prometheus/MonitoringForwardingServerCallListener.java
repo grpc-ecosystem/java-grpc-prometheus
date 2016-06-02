@@ -25,7 +25,7 @@ class MonitoringForwardingServerCallListener<R>
 
   @Override
   public void onMessage(R request) {
-    metricHelper.addLabels(ServerMetrics.serverStreamMessagesReceived).inc();
+    metricHelper.recordMessageReceived();
     super.onMessage(request);
   }
 }

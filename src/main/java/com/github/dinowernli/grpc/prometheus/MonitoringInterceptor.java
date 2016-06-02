@@ -3,12 +3,14 @@
 package com.github.dinowernli.grpc.prometheus;
 
 import java.time.Clock;
+import java.util.Optional;
 
 import io.grpc.Metadata;
 import io.grpc.MethodDescriptor;
 import io.grpc.ServerCall;
 import io.grpc.ServerCallHandler;
 import io.grpc.ServerInterceptor;
+import io.prometheus.client.CollectorRegistry;
 
 /** An interceptor which sends stats about incoming grpc calls to Prometheus. */
 public class MonitoringInterceptor implements ServerInterceptor {
@@ -30,7 +32,7 @@ public class MonitoringInterceptor implements ServerInterceptor {
       ServerCall<S> call,
       Metadata requestHeaders,
       ServerCallHandler<R, S> next) {
-    MetricHelper metricHelper = MetricHelper.create(method);
+    MetricHelper metricHelper = MetricHelper.create(method, configuration.getCollectorRegistry());
     ServerCall<S> monitoringCall = new MonitoringForwardingServerCall<S>(
         call, clock, method.getType(), metricHelper, configuration);
     return new MonitoringForwardingServerCallListener<R>(
@@ -43,10 +45,12 @@ public class MonitoringInterceptor implements ServerInterceptor {
    */
   public static class Configuration {
     private final boolean isIncludeLatencyHistograms;
+    private final Optional<CollectorRegistry> collectorRegistry;
 
     /** Returns a {@link Configuration} for recording all cheap metrics about the rpcs. */
     public static Configuration cheapMetricsOnly() {
-      return new Configuration(false /* isIncludeLatencyHistograms */);
+      return new Configuration(
+          false /* isIncludeLatencyHistograms */, Optional.empty() /* collectorRegistry */);
     }
 
     /**
@@ -54,7 +58,16 @@ public class MonitoringInterceptor implements ServerInterceptor {
      * metrics which might produce a lot of data, such as latency histograms.
      */
     public static Configuration allMetrics() {
-      return new Configuration(false /* isIncludeLatencyHistograms */);
+      return new Configuration(
+          false /* isIncludeLatencyHistograms */, Optional.empty() /* collectorRegistry */);
+    }
+
+    /**
+     * Returns a copy {@link Configuration} with the difference that Prometheus metrics are
+     * recorded using the supplied {@link CollectorRegistry}.
+     */
+    public Configuration withCollectorRegistry(CollectorRegistry collectorRegistry) {
+      return new Configuration(isIncludeLatencyHistograms, Optional.of(collectorRegistry));
     }
 
     /** Returns whether or not latency histograms for calls should be included. */
@@ -62,8 +75,15 @@ public class MonitoringInterceptor implements ServerInterceptor {
       return isIncludeLatencyHistograms;
     }
 
-    private Configuration(boolean isIncludeLatencyHistograms) {
+    /** Returns the {@link CollectorRegistry} used to record stats. */
+    public Optional<CollectorRegistry> getCollectorRegistry() {
+      return collectorRegistry;
+    }
+
+    private Configuration(
+        boolean isIncludeLatencyHistograms, Optional<CollectorRegistry> collectorRegistry) {
       this.isIncludeLatencyHistograms = isIncludeLatencyHistograms;
+      this.collectorRegistry = collectorRegistry;
     }
   }
 }

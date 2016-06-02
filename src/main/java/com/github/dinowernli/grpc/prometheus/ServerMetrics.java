@@ -35,7 +35,7 @@ public class ServerMetrics {
       .subsystem("server")
       .name("msg_received_total")
       .labelNames("grpc_type", "grpc_service", "grpc_method")
-      .help("Total number of RPCs started on the server.")
+      .help("Total number of messages received from the client.")
       .register();
 
   static final Counter serverStreamMessagesSent = Counter.build()

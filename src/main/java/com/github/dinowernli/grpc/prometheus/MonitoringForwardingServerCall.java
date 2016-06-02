@@ -54,25 +54,21 @@ class MonitoringForwardingServerCall<S> extends ForwardingServerCall.SimpleForwa
   @Override
   public void sendMessage(S message) {
     if (methodType == MethodType.SERVER_STREAMING || methodType == MethodType.BIDI_STREAMING) {
-      metricHelper.addLabels(ServerMetrics.serverStreamMessagesSent).inc();
+      metricHelper.recordStreamMessageSent();
     }
     super.sendMessage(message);
   }
 
   private void reportStartMetrics() {
-    metricHelper.addLabels(ServerMetrics.serverStartedCounter).inc();
+    metricHelper.recordCallStarted();
   }
 
   private void reportEndMetrics(Status status) {
-    String codeString = status.getCode().toString();
-    metricHelper.addLabels(ServerMetrics.serverHandledCounter, codeString).inc();
-
+    metricHelper.recordServerHandled(status.getCode());
     if (configuration.isIncludeLatencyHistograms()) {
       double latencySec =
           (clock.millis() - startInstant.get().toEpochMilli()) / (double) MILLIS_PER_SECOND;
-      metricHelper
-          .addLabels(ServerMetrics.serverHandledLatencySecondsHistogram)
-          .observe(latencySec);
+      metricHelper.recordLatency(latencySec);
     }
   }
 }
