@@ -23,7 +23,7 @@ class MonitoringForwardingServerCall<S> extends ForwardingServerCall.SimpleForwa
 
   private final Clock clock;
   private final MethodType methodType;
-  private final MetricHelper metricHelper;
+  private final ServerMetrics serverMetrics;
   private final Configuration configuration;
 
   private final Optional<Instant> startInstant;
@@ -32,12 +32,12 @@ class MonitoringForwardingServerCall<S> extends ForwardingServerCall.SimpleForwa
       ServerCall<S> delegate,
       Clock clock,
       MethodType methodType,
-      MetricHelper metricHelper,
+      ServerMetrics serverMetrics,
       Configuration configuration) {
     super(delegate);
     this.clock = clock;
     this.methodType = methodType;
-    this.metricHelper = metricHelper;
+    this.serverMetrics = serverMetrics;
     this.configuration = configuration;
     this.startInstant = Optional.of(clock.instant());
 
@@ -54,21 +54,21 @@ class MonitoringForwardingServerCall<S> extends ForwardingServerCall.SimpleForwa
   @Override
   public void sendMessage(S message) {
     if (methodType == MethodType.SERVER_STREAMING || methodType == MethodType.BIDI_STREAMING) {
-      metricHelper.recordStreamMessageSent();
+      serverMetrics.recordStreamMessageSent();
     }
     super.sendMessage(message);
   }
 
   private void reportStartMetrics() {
-    metricHelper.recordCallStarted();
+    serverMetrics.recordCallStarted();
   }
 
   private void reportEndMetrics(Status status) {
-    metricHelper.recordServerHandled(status.getCode());
+    serverMetrics.recordServerHandled(status.getCode());
     if (configuration.isIncludeLatencyHistograms()) {
       double latencySec =
           (clock.millis() - startInstant.get().toEpochMilli()) / (double) MILLIS_PER_SECOND;
-      metricHelper.recordLatency(latencySec);
+      serverMetrics.recordLatency(latencySec);
     }
   }
 }

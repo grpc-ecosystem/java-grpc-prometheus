@@ -10,12 +10,12 @@ import io.grpc.ServerCall;
 class MonitoringForwardingServerCallListener<R>
     extends ForwardingServerCallListener<R> {
   private final ServerCall.Listener<R> delegate;
-  private final MetricHelper metricHelper;
+  private final ServerMetrics serverMetrics;
 
   MonitoringForwardingServerCallListener(
-      ServerCall.Listener<R> delegate, MetricHelper metricHelper) {
+      ServerCall.Listener<R> delegate, ServerMetrics serverMetrics) {
     this.delegate = delegate;
-    this.metricHelper = metricHelper;
+    this.serverMetrics = serverMetrics;
   }
 
   @Override
@@ -25,7 +25,7 @@ class MonitoringForwardingServerCallListener<R>
 
   @Override
   public void onMessage(R request) {
-    metricHelper.recordMessageReceived();
+    serverMetrics.recordMessageReceived();
     super.onMessage(request);
   }
 }

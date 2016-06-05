@@ -67,11 +67,9 @@ public class MonitoringInterceptorIntegrationTest {
 
   @Before
   public void setUp() {
-    startMetricServer();
-    startGrpcServer();
-
-    // TODO(dino): Add support for plumbing a custom collector registry into the interceptor.
-    CollectorRegistry.defaultRegistry.clear();
+    CollectorRegistry collectorRegistry = new CollectorRegistry();
+    startMetricServer(collectorRegistry);
+    startGrpcServer(collectorRegistry);
   }
 
   @After
@@ -114,9 +112,9 @@ public class MonitoringInterceptorIntegrationTest {
     // TODO(dino): Add plumbing for disabling histograms in the test.
   }
 
-  private void startGrpcServer() {
-    MonitoringInterceptor interceptor =
-        MonitoringInterceptor.create(Configuration.cheapMetricsOnly());
+  private void startGrpcServer(CollectorRegistry collectorRegistry) {
+    MonitoringInterceptor interceptor = MonitoringInterceptor.create(
+        Configuration.cheapMetricsOnly().withCollectorRegistry(collectorRegistry));
     grpcServer = ServerBuilder.forPort(GRPC_PORT)
         .addService(ServerInterceptors.intercept(
             HelloServiceGrpc.bindService(new HelloServiceImpl()), interceptor))
@@ -128,12 +126,12 @@ public class MonitoringInterceptorIntegrationTest {
     }
   }
 
-  private void startMetricServer() {
+  private void startMetricServer(CollectorRegistry collectorRegistry) {
     metricsServer = new org.eclipse.jetty.server.Server(METRICS_SERVLET_PORT);
     ServletContextHandler context = new ServletContextHandler();
     context.setContextPath(METRICS_SERVLET_ROOT);
     metricsServer.setHandler(context);
-    context.addServlet(new ServletHolder(new MetricsServlet()), METRICS_PATH);
+    context.addServlet(new ServletHolder(new MetricsServlet(collectorRegistry)), METRICS_PATH);
     try {
       metricsServer.start();
     } catch (Exception e) {

@@ -32,11 +32,13 @@ public class MonitoringInterceptor implements ServerInterceptor {
       ServerCall<S> call,
       Metadata requestHeaders,
       ServerCallHandler<R, S> next) {
-    MetricHelper metricHelper = MetricHelper.create(method, configuration.getCollectorRegistry());
+    // TODO(dino): If we cache the ServerMetrics instance, we can achieve an initial 0 value on
+    // registration and save some cycles here where we always create a new one per-request.
+    ServerMetrics metrics = ServerMetrics.create(method, configuration.getCollectorRegistry());
     ServerCall<S> monitoringCall = new MonitoringForwardingServerCall<S>(
-        call, clock, method.getType(), metricHelper, configuration);
+        call, clock, method.getType(), metrics, configuration);
     return new MonitoringForwardingServerCallListener<R>(
-        next.startCall(method, monitoringCall, requestHeaders), metricHelper);
+        next.startCall(method, monitoringCall, requestHeaders), metrics);
   }
 
   /**
