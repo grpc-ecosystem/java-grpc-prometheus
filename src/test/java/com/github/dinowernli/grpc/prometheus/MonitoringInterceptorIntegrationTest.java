@@ -60,6 +60,8 @@ public class MonitoringInterceptorIntegrationTest {
   public void unaryRpcMetrics() throws Throwable {
     createGrpcBlockingStub().sayHello(REQUEST);
 
+    // TODO(dino): Rename the service from Polyglot to something else.
+
     MetricFamilySamples handled = findRecordedMetric("grpc_server_handled_total");
     assertThat(handled.samples).hasSize(1);
     assertThat(handled.samples.get(0).labelValues).containsExactly(
