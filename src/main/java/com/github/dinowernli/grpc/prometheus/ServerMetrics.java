@@ -37,7 +37,7 @@ class ServerMetrics {
       Histogram.build()
           .namespace("grpc")
           .subsystem("server")
-          .name("handled_total")
+          .name("handled_latency_seconds")
           .labelNames("grpc_type", "grpc_service", "grpc_method")
           .help("Histogram of response latency (seconds) of gRPC that had been application-level " +
               "handled by the server.");
@@ -52,7 +52,7 @@ class ServerMetrics {
   private static final Counter.Builder serverStreamMessagesSentBuilder = Counter.build()
       .namespace("grpc")
       .subsystem("server")
-      .name("msg_received_total")
+      .name("msg_sent_total")
       .labelNames("grpc_type", "grpc_service", "grpc_method")
       .help("Total number of gRPC stream messages sent by the server.");
 
