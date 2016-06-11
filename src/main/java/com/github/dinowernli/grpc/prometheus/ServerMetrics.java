@@ -74,7 +74,9 @@ class ServerMetrics {
       MethodDescriptor<R, S> method, Optional<CollectorRegistry> collectorRegistry) {
     CollectorRegistry registry = collectorRegistry.orElse(CollectorRegistry.defaultRegistry);
     String serviceName = MethodDescriptor.extractFullServiceName(method.getFullMethodName());
-    String methodName = method.getFullMethodName();
+
+    // Full method names are of the form: "full.serviceName/MethodName". We extract the last part.
+    String methodName = method.getFullMethodName().substring(serviceName.length() + 1);
     return new ServerMetrics(method.getType().toString(), serviceName, methodName, registry);
   }
 
@@ -98,12 +100,12 @@ class ServerMetrics {
     addLabels(serverStarted).inc();
   }
 
-  public void recordStreamMessageSent() {
-    addLabels(serverStreamMessagesSent).inc();
-  }
-
   public void recordServerHandled(Code code) {
     addLabels(serverHandled, code.toString()).inc();
+  }
+
+  public void recordStreamMessageSent() {
+    addLabels(serverStreamMessagesSent).inc();
   }
 
   public void recordLatency(double latencySec) {

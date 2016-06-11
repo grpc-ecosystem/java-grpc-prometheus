@@ -13,6 +13,11 @@ import org.junit.Test;
 
 import com.github.dinowernli.grpc.prometheus.MonitoringInterceptor.Configuration;
 import com.github.dinowernli.grpc.prometheus.testing.HelloServiceImpl;
+import com.github.dinowernli.proto.grpc.prometheus.HelloProto.HelloRequest;
+import com.github.dinowernli.proto.grpc.prometheus.HelloProto.HelloResponse;
+import com.github.dinowernli.proto.grpc.prometheus.HelloServiceGrpc;
+import com.github.dinowernli.proto.grpc.prometheus.HelloServiceGrpc.HelloServiceBlockingStub;
+import com.github.dinowernli.proto.grpc.prometheus.HelloServiceGrpc.HelloServiceStub;
 
 import io.grpc.Channel;
 import io.grpc.Server;
@@ -25,17 +30,14 @@ import io.grpc.testing.StreamRecorder;
 import io.grpc.testing.TestUtils;
 import io.prometheus.client.Collector.MetricFamilySamples;
 import io.prometheus.client.CollectorRegistry;
-import polyglot.HelloProto.HelloRequest;
-import polyglot.HelloProto.HelloResponse;
-import polyglot.HelloServiceGrpc;
-import polyglot.HelloServiceGrpc.HelloServiceBlockingStub;
-import polyglot.HelloServiceGrpc.HelloServiceStub;
 
 /**
  * Integrations tests which make sure that if a service is started with a
  * {@link MonitoringInterceptor}, then all Prometheus metrics get recorded correctly.
  */
 public class MonitoringInterceptorIntegrationTest {
+  private static final String SERVICE_NAME =
+      "com.github.dinowernli.proto.grpc.prometheus.HelloService";
   private static final String RECIPIENT = "Dave";
   private static final HelloRequest REQUEST = HelloRequest.newBuilder()
       .setRecipient(RECIPIENT)
@@ -60,12 +62,10 @@ public class MonitoringInterceptorIntegrationTest {
   public void unaryRpcMetrics() throws Throwable {
     createGrpcBlockingStub().sayHello(REQUEST);
 
-    // TODO(dino): Rename the service from Polyglot to something else.
-
     MetricFamilySamples handled = findRecordedMetric("grpc_server_handled_total");
     assertThat(handled.samples).hasSize(1);
     assertThat(handled.samples.get(0).labelValues).containsExactly(
-        "UNARY", "polyglot.HelloService", "polyglot.HelloService/SayHello", "OK");
+        "UNARY", SERVICE_NAME, "SayHello", "OK");
     assertThat(handled.samples.get(0).value).isWithin(0).of(1);
   }
 
@@ -84,10 +84,7 @@ public class MonitoringInterceptorIntegrationTest {
     MetricFamilySamples handled = findRecordedMetric("grpc_server_handled_total");
     assertThat(handled.samples).hasSize(1);
     assertThat(handled.samples.get(0).labelValues).containsExactly(
-        "CLIENT_STREAMING",
-        "polyglot.HelloService",
-        "polyglot.HelloService/SayHelloClientStream",
-        "OK");
+        "CLIENT_STREAMING", SERVICE_NAME, "SayHelloClientStream", "OK");
     assertThat(handled.samples.get(0).value).isWithin(0).of(1);
   }
 

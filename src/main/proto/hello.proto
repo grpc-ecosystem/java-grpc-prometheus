@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package polyglot;
+package com.github.dinowernli.proto.grpc.prometheus;
 
 option java_outer_classname = "HelloProto";
 
