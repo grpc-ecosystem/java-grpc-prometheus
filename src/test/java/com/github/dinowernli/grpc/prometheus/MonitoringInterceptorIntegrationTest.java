@@ -11,13 +11,14 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.github.dinowernli.grpc.prometheus.MonitoringInterceptor.Configuration;
+import com.github.dinowernli.grpc.prometheus.MonitoringServerInterceptor.Configuration;
 import com.github.dinowernli.grpc.prometheus.testing.HelloServiceImpl;
 import com.github.dinowernli.proto.grpc.prometheus.HelloProto.HelloRequest;
 import com.github.dinowernli.proto.grpc.prometheus.HelloProto.HelloResponse;
 import com.github.dinowernli.proto.grpc.prometheus.HelloServiceGrpc;
 import com.github.dinowernli.proto.grpc.prometheus.HelloServiceGrpc.HelloServiceBlockingStub;
 import com.github.dinowernli.proto.grpc.prometheus.HelloServiceGrpc.HelloServiceStub;
+import com.google.common.collect.ImmutableList;
 
 import io.grpc.Channel;
 import io.grpc.Server;
@@ -33,11 +34,16 @@ import io.prometheus.client.CollectorRegistry;
 
 /**
  * Integrations tests which make sure that if a service is started with a
- * {@link MonitoringInterceptor}, then all Prometheus metrics get recorded correctly.
+ * {@link MonitoringServerInterceptor}, then all Prometheus metrics get recorded correctly.
  */
 public class MonitoringInterceptorIntegrationTest {
   private static final String SERVICE_NAME =
       "com.github.dinowernli.proto.grpc.prometheus.HelloService";
+  private static final String UNARY_METHOD_NAME = "SayHello";
+  private static final String CLIENT_STREAM_METHOD_NAME = "SayHelloClientStream";
+  private static final String SERVER_STREAM_METHOD_NAME = "SayHelloServerStream";
+  private static final String BIDI_STREAM_METHOD_NAME = "SayHelloBidiStream";
+
   private static final String RECIPIENT = "Dave";
   private static final HelloRequest REQUEST = HelloRequest.newBuilder()
       .setRecipient(RECIPIENT)
@@ -65,7 +71,7 @@ public class MonitoringInterceptorIntegrationTest {
     MetricFamilySamples handled = findRecordedMetric("grpc_server_handled_total");
     assertThat(handled.samples).hasSize(1);
     assertThat(handled.samples.get(0).labelValues).containsExactly(
-        "UNARY", SERVICE_NAME, "SayHello", "OK");
+        "UNARY", SERVICE_NAME, UNARY_METHOD_NAME, "OK");
     assertThat(handled.samples.get(0).value).isWithin(0).of(1);
   }
 
@@ -84,7 +90,43 @@ public class MonitoringInterceptorIntegrationTest {
     MetricFamilySamples handled = findRecordedMetric("grpc_server_handled_total");
     assertThat(handled.samples).hasSize(1);
     assertThat(handled.samples.get(0).labelValues).containsExactly(
-        "CLIENT_STREAMING", SERVICE_NAME, "SayHelloClientStream", "OK");
+        "CLIENT_STREAMING", SERVICE_NAME, CLIENT_STREAM_METHOD_NAME, "OK");
+    assertThat(handled.samples.get(0).value).isWithin(0).of(1);
+  }
+
+  @Test
+  public void serverStreamRpcMetrics() throws Throwable {
+    ImmutableList<HelloResponse> responses =
+        ImmutableList.copyOf(createGrpcBlockingStub().sayHelloServerStream(REQUEST));
+
+    MetricFamilySamples handled = findRecordedMetric("grpc_server_handled_total");
+    assertThat(handled.samples).hasSize(1);
+    assertThat(handled.samples.get(0).labelValues).containsExactly(
+        "SERVER_STREAMING", SERVICE_NAME, SERVER_STREAM_METHOD_NAME, "OK");
+    assertThat(handled.samples.get(0).value).isWithin(0).of(1);
+
+    MetricFamilySamples messagesSent = findRecordedMetric("grpc_server_msg_sent_total");
+    assertThat(messagesSent.samples.get(0).labelValues).containsExactly(
+        "SERVER_STREAMING", SERVICE_NAME, SERVER_STREAM_METHOD_NAME);
+    assertThat(messagesSent.samples.get(0).value).isWithin(0).of(responses.size());
+  }
+
+  @Test
+  public void bidiStreamRpcMetrics() throws Throwable {
+    StreamRecorder<HelloResponse> streamRecorder = StreamRecorder.create();
+    StreamObserver<HelloRequest> requestStream =
+        createGrpcStub().sayHelloBidiStream(streamRecorder);
+    requestStream.onNext(REQUEST);
+    requestStream.onNext(REQUEST);
+    requestStream.onCompleted();
+
+    // Not a blocking stub, so we need to wait.
+    streamRecorder.awaitCompletion();
+
+    MetricFamilySamples handled = findRecordedMetric("grpc_server_handled_total");
+    assertThat(handled.samples).hasSize(1);
+    assertThat(handled.samples.get(0).labelValues).containsExactly(
+        "BIDI_STREAMING", SERVICE_NAME, BIDI_STREAM_METHOD_NAME, "OK");
     assertThat(handled.samples.get(0).value).isWithin(0).of(1);
   }
 
@@ -96,7 +138,7 @@ public class MonitoringInterceptorIntegrationTest {
   }
 
   private void startGrpcServer() {
-    MonitoringInterceptor interceptor = MonitoringInterceptor.create(
+    MonitoringServerInterceptor interceptor = MonitoringServerInterceptor.create(
         Configuration.cheapMetricsOnly().withCollectorRegistry(collectorRegistry));
     grpcPort = TestUtils.pickUnusedPort();
     grpcServer = ServerBuilder.forPort(grpcPort)

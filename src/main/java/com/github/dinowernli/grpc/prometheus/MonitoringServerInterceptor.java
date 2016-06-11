@@ -13,15 +13,15 @@ import io.grpc.ServerInterceptor;
 import io.prometheus.client.CollectorRegistry;
 
 /** An interceptor which sends stats about incoming grpc calls to Prometheus. */
-public class MonitoringInterceptor implements ServerInterceptor {
+public class MonitoringServerInterceptor implements ServerInterceptor {
   private final Clock clock;
   private final Configuration configuration;
 
-  public static MonitoringInterceptor create(Configuration configuration) {
-    return new MonitoringInterceptor(Clock.systemDefaultZone(), configuration);
+  public static MonitoringServerInterceptor create(Configuration configuration) {
+    return new MonitoringServerInterceptor(Clock.systemDefaultZone(), configuration);
   }
 
-  private MonitoringInterceptor(Clock clock, Configuration configuration) {
+  private MonitoringServerInterceptor(Clock clock, Configuration configuration) {
     this.clock = clock;
     this.configuration = configuration;
   }

@@ -6,7 +6,7 @@ import java.time.Clock;
 import java.time.Instant;
 import java.util.Optional;
 
-import com.github.dinowernli.grpc.prometheus.MonitoringInterceptor.Configuration;
+import com.github.dinowernli.grpc.prometheus.MonitoringServerInterceptor.Configuration;
 
 import io.grpc.ForwardingServerCall;
 import io.grpc.Metadata;
