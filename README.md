@@ -1,6 +1,10 @@
 # java-grpc-prometheus
 Java interceptors which can be used to monitor Grpc services using Prometheus.
 
+## Features
+
+TODO
+
 ## Usage
 
 This library is made available on the [dinowernli GitHub Maven repository](https://github.com/dinowernli/maven-repos/tree/master).
@@ -21,6 +25,9 @@ grpcServer = ServerBuilder.forPort(GRPC_PORT)
     .build();
 ```
 
+## Planned additions
+
+* Analogous client interceptors
 
 ## Related reading
 
