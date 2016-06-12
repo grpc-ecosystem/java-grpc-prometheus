@@ -1,6 +1,6 @@
 // Copyright 2016 Dino Wernli. All Rights Reserved. See LICENSE for licensing terms.
 
-package com.github.dinowernli.grpc.prometheus;
+package me.dinowernli.grpc.prometheus.integration;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -11,8 +11,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.github.dinowernli.grpc.prometheus.MonitoringServerInterceptor.Configuration;
-import com.github.dinowernli.grpc.prometheus.testing.HelloServiceImpl;
 import com.github.dinowernli.proto.grpc.prometheus.HelloProto.HelloRequest;
 import com.github.dinowernli.proto.grpc.prometheus.HelloProto.HelloResponse;
 import com.github.dinowernli.proto.grpc.prometheus.HelloServiceGrpc;
@@ -30,6 +28,9 @@ import io.grpc.stub.StreamObserver;
 import io.grpc.testing.StreamRecorder;
 import io.grpc.testing.TestUtils;
 import io.prometheus.client.Collector.MetricFamilySamples;
+import me.dinowernli.grpc.prometheus.MonitoringServerInterceptor;
+import me.dinowernli.grpc.prometheus.MonitoringServerInterceptor.Configuration;
+import me.dinowernli.grpc.prometheus.testing.HelloServiceImpl;
 import io.prometheus.client.CollectorRegistry;
 
 /**

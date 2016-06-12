@@ -1,4 +1,4 @@
-package com.github.dinowernli.grpc.prometheus;
+package me.dinowernli.grpc.prometheus;
 
 import io.grpc.ForwardingServerCallListener;
 import io.grpc.ServerCall;
@@ -7,12 +7,12 @@ import io.grpc.ServerCall;
  * A {@link ForwardingServerCallListener} which updates Prometheus metrics for a single rpc based
  * on updates received from grpc.
  */
-class MonitoringForwardingServerCallListener<R>
+class MonitoringServerCallListener<R>
     extends ForwardingServerCallListener<R> {
   private final ServerCall.Listener<R> delegate;
   private final ServerMetrics serverMetrics;
 
-  MonitoringForwardingServerCallListener(
+  MonitoringServerCallListener(
       ServerCall.Listener<R> delegate, ServerMetrics serverMetrics) {
     this.delegate = delegate;
     this.serverMetrics = serverMetrics;

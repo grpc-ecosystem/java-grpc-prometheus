@@ -3,8 +3,8 @@ java_test(
   srcs = glob(['*.java']),
   size = "small",
   deps = [
-    "//src/main/java/com/github/dinowernli/grpc/prometheus",
-    "//src/main/java/com/github/dinowernli/grpc/prometheus/testing",
+    "//src/main/java/me/dinowernli/grpc/prometheus",
+    "//src/main/java/me/dinowernli/grpc/prometheus/testing",
     "//src/main/proto:hello_proto_grpc",
     "//third_party/grpc",
     "//third_party/grpc:testing",

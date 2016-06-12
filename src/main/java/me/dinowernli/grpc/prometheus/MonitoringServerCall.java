@@ -1,16 +1,15 @@
 // Copyright 2016 Dino Wernli. All Rights Reserved. See LICENSE for licensing terms.
 
-package com.github.dinowernli.grpc.prometheus;
+package me.dinowernli.grpc.prometheus;
 
 import java.time.Clock;
 import java.time.Instant;
 import java.util.Optional;
 
-import com.github.dinowernli.grpc.prometheus.MonitoringServerInterceptor.Configuration;
-
 import io.grpc.ForwardingServerCall;
 import io.grpc.Metadata;
 import io.grpc.MethodDescriptor.MethodType;
+import me.dinowernli.grpc.prometheus.MonitoringServerInterceptor.Configuration;
 import io.grpc.ServerCall;
 import io.grpc.Status;
 
@@ -18,7 +17,7 @@ import io.grpc.Status;
  * A {@link ForwardingServerCall} which update Prometheus metrics based on the server-side actions
  * taken for a single rpc, e.g., messages sent, latency, etc.
  */
-class MonitoringForwardingServerCall<S> extends ForwardingServerCall.SimpleForwardingServerCall<S> {
+class MonitoringServerCall<S> extends ForwardingServerCall.SimpleForwardingServerCall<S> {
   private static final long MILLIS_PER_SECOND = 1000L;
 
   private final Clock clock;
@@ -28,7 +27,7 @@ class MonitoringForwardingServerCall<S> extends ForwardingServerCall.SimpleForwa
 
   private final Optional<Instant> startInstant;
 
-  MonitoringForwardingServerCall(
+  MonitoringServerCall(
       ServerCall<S> delegate,
       Clock clock,
       MethodType methodType,

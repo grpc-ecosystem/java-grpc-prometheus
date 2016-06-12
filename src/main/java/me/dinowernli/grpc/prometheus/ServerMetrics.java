@@ -1,4 +1,4 @@
-package com.github.dinowernli.grpc.prometheus;
+package me.dinowernli.grpc.prometheus;
 
 import java.util.ArrayList;
 import java.util.Collections;

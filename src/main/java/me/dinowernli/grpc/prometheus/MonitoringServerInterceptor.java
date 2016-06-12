@@ -1,6 +1,6 @@
 // Copyright 2016 Dino Wernli. All Rights Reserved. See LICENSE for licensing terms.
 
-package com.github.dinowernli.grpc.prometheus;
+package me.dinowernli.grpc.prometheus;
 
 import java.time.Clock;
 import java.util.Optional;
@@ -35,9 +35,9 @@ public class MonitoringServerInterceptor implements ServerInterceptor {
     // TODO(dino): If we cache the ServerMetrics instance, we can achieve an initial 0 value on
     // registration and save some cycles here where we always create a new one per-request.
     ServerMetrics metrics = ServerMetrics.create(method, configuration.getCollectorRegistry());
-    ServerCall<S> monitoringCall = new MonitoringForwardingServerCall<S>(
+    ServerCall<S> monitoringCall = new MonitoringServerCall<S>(
         call, clock, method.getType(), metrics, configuration);
-    return new MonitoringForwardingServerCallListener<R>(
+    return new MonitoringServerCallListener<R>(
         next.startCall(method, monitoringCall, requestHeaders), metrics);
   }
 
