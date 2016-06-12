@@ -8,7 +8,7 @@ TODO
 ## Usage
 
 This library is made available on the [dinowernli GitHub Maven repository](https://github.com/dinowernli/maven-repos/tree/master).
-Once the repository is set up, the library can be included using the artifact id 
+Once the repository is set up, the library can be included using the following artifact id:
 
 ```
 me.dinowernli:java-grpc-prometheus:0.1.0
@@ -16,7 +16,7 @@ me.dinowernli:java-grpc-prometheus:0.1.0
 
 In order to attach the monitoring interceptor to your gRPC server, you can do the following:
 
-```
+```java
 MonitoringServerInterceptor monitoringInterceptor = 
     MonitoringServerInterceptor.create(Configuration.cheapMetricsOnly());
 grpcServer = ServerBuilder.forPort(GRPC_PORT)
