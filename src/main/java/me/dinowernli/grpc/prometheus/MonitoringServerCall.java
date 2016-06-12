@@ -9,9 +9,9 @@ import java.util.Optional;
 import io.grpc.ForwardingServerCall;
 import io.grpc.Metadata;
 import io.grpc.MethodDescriptor.MethodType;
-import me.dinowernli.grpc.prometheus.MonitoringServerInterceptor.Configuration;
 import io.grpc.ServerCall;
 import io.grpc.Status;
+import me.dinowernli.grpc.prometheus.MonitoringServerInterceptor.Configuration;
 
 /**
  * A {@link ForwardingServerCall} which update Prometheus metrics based on the server-side actions

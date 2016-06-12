@@ -16,14 +16,18 @@ import io.prometheus.client.CollectorRegistry;
 public class MonitoringServerInterceptor implements ServerInterceptor {
   private final Clock clock;
   private final Configuration configuration;
+  private final ServerMetrics.Factory serverMetricsFactory;
 
   public static MonitoringServerInterceptor create(Configuration configuration) {
-    return new MonitoringServerInterceptor(Clock.systemDefaultZone(), configuration);
+    return new MonitoringServerInterceptor(
+        Clock.systemDefaultZone(), configuration, new ServerMetrics.Factory(configuration));
   }
 
-  private MonitoringServerInterceptor(Clock clock, Configuration configuration) {
+  private MonitoringServerInterceptor(
+      Clock clock, Configuration configuration, ServerMetrics.Factory serverMetricsFactory) {
     this.clock = clock;
     this.configuration = configuration;
+    this.serverMetricsFactory = serverMetricsFactory;
   }
 
   @Override
@@ -32,13 +36,11 @@ public class MonitoringServerInterceptor implements ServerInterceptor {
       ServerCall<S> call,
       Metadata requestHeaders,
       ServerCallHandler<R, S> next) {
-    // TODO(dino): If we cache the ServerMetrics instance, we can achieve an initial 0 value on
-    // registration and save some cycles here where we always create a new one per-request.
-    ServerMetrics metrics = ServerMetrics.create(method, configuration.getCollectorRegistry());
+    ServerMetrics metrics = serverMetricsFactory.createMetricsForMethod(method);
     ServerCall<S> monitoringCall = new MonitoringServerCall<S>(
         call, clock, method.getType(), metrics, configuration);
     return new MonitoringServerCallListener<R>(
-        next.startCall(method, monitoringCall, requestHeaders), metrics);
+        next.startCall(method, monitoringCall, requestHeaders), metrics, method.getType());
   }
 
   /**
@@ -61,7 +63,7 @@ public class MonitoringServerInterceptor implements ServerInterceptor {
      */
     public static Configuration allMetrics() {
       return new Configuration(
-          false /* isIncludeLatencyHistograms */, Optional.empty() /* collectorRegistry */);
+          true /* isIncludeLatencyHistograms */, Optional.empty() /* collectorRegistry */);
     }
 
     /**
@@ -78,8 +80,8 @@ public class MonitoringServerInterceptor implements ServerInterceptor {
     }
 
     /** Returns the {@link CollectorRegistry} used to record stats. */
-    public Optional<CollectorRegistry> getCollectorRegistry() {
-      return collectorRegistry;
+    public CollectorRegistry getCollectorRegistry() {
+      return collectorRegistry.orElse(CollectorRegistry.defaultRegistry);
     }
 
     private Configuration(

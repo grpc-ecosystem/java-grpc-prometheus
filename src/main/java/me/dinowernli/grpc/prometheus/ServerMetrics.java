@@ -11,6 +11,7 @@ import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.Counter;
 import io.prometheus.client.Histogram;
 import io.prometheus.client.SimpleCollector;
+import me.dinowernli.grpc.prometheus.MonitoringServerInterceptor.Configuration;
 
 /**
  * Prometheus metric definitions used for server-side monitoring of grpc services.
@@ -47,53 +48,42 @@ class ServerMetrics {
       .subsystem("server")
       .name("msg_received_total")
       .labelNames("grpc_type", "grpc_service", "grpc_method")
-      .help("Total number of messages received from the client.");
+      .help("Total number of stream messages received from the client.");
 
   private static final Counter.Builder serverStreamMessagesSentBuilder = Counter.build()
       .namespace("grpc")
       .subsystem("server")
       .name("msg_sent_total")
       .labelNames("grpc_type", "grpc_service", "grpc_method")
-      .help("Total number of gRPC stream messages sent by the server.");
+      .help("Total number of stream messages sent by the server.");
 
   private final Counter serverStarted;
   private final Counter serverHandled;
-  private final Histogram serverHandledLatencySeconds;
   private final Counter serverStreamMessagesReceived;
   private final Counter serverStreamMessagesSent;
+  private final Optional<Histogram> serverHandledLatencySeconds;
 
   private final String methodTypeLabel;
   private final String serviceNameLabel;
   private final String methodNameLabel;
 
-  /**
-   * Creates an instance of {@link ServerMetrics} for the supplied method. If the
-   * {@link CollectorRegistry} is empty, the default global registry is used.
-   */
-  static <R, S> ServerMetrics create(
-      MethodDescriptor<R, S> method, Optional<CollectorRegistry> collectorRegistry) {
-    CollectorRegistry registry = collectorRegistry.orElse(CollectorRegistry.defaultRegistry);
-    String serviceName = MethodDescriptor.extractFullServiceName(method.getFullMethodName());
-
-    // Full method names are of the form: "full.serviceName/MethodName". We extract the last part.
-    String methodName = method.getFullMethodName().substring(serviceName.length() + 1);
-    return new ServerMetrics(method.getType().toString(), serviceName, methodName, registry);
-  }
-
   private ServerMetrics(
       String methodTypeLabel,
       String serviceNameLabel,
       String methodNameLabel,
-      CollectorRegistry registry) {
+      Counter serverStarted,
+      Counter serverHandled,
+      Counter serverStreamMessagesReceived,
+      Counter serverStreamMessagesSent,
+      Optional<Histogram> serverHandledLatencySeconds) {
     this.methodNameLabel = methodNameLabel;
     this.methodTypeLabel = methodTypeLabel;
     this.serviceNameLabel = serviceNameLabel;
-
-    this.serverStarted = serverStartedBuilder.register(registry);
-    this.serverHandled = serverHandledBuilder.register(registry);
-    this.serverHandledLatencySeconds = serverHandledLatencySecondsBuilder.register(registry);
-    this.serverStreamMessagesReceived = serverStreamMessagesReceivedBuilder.register(registry);
-    this.serverStreamMessagesSent = serverStreamMessagesSentBuilder.register(registry);
+    this.serverStarted = serverStarted;
+    this.serverHandled = serverHandled;
+    this.serverStreamMessagesReceived = serverStreamMessagesReceived;
+    this.serverStreamMessagesSent = serverStreamMessagesSent;
+    this.serverHandledLatencySeconds = serverHandledLatencySeconds;
   }
 
   public void recordCallStarted() {
@@ -108,12 +98,62 @@ class ServerMetrics {
     addLabels(serverStreamMessagesSent).inc();
   }
 
-  public void recordLatency(double latencySec) {
-    addLabels(serverHandledLatencySeconds).observe(latencySec);
+  public void recordStreamMessageReceived() {
+    addLabels(serverStreamMessagesReceived).inc();
   }
 
-  public void recordMessageReceived() {
-    addLabels(serverStreamMessagesReceived).inc();
+  /**
+   * Only has any effect if monitoring is configured to include latency histograms. Otherwise, this
+   * does nothing.
+   */
+  public void recordLatency(double latencySec) {
+    if (!this.serverHandledLatencySeconds.isPresent()) {
+      return;
+    }
+    addLabels(this.serverHandledLatencySeconds.get()).observe(latencySec);
+  }
+
+  /**
+   * Knows how to produce {@link ServerMetrics} instances for individual methods.
+   */
+  static class Factory {
+    private final Counter serverStarted;
+    private final Counter serverHandled;
+    private final Counter serverStreamMessagesReceived;
+    private final Counter serverStreamMessagesSent;
+    private final Optional<Histogram> serverHandledLatencySeconds;
+
+    Factory(Configuration configuration) {
+      CollectorRegistry registry = configuration.getCollectorRegistry();
+      this.serverStarted = serverStartedBuilder.register(registry);
+      this.serverHandled = serverHandledBuilder.register(registry);
+      this.serverStreamMessagesReceived = serverStreamMessagesReceivedBuilder.register(registry);
+      this.serverStreamMessagesSent = serverStreamMessagesSentBuilder.register(registry);
+
+      if (configuration.isIncludeLatencyHistograms()) {
+        this.serverHandledLatencySeconds =
+            Optional.of(serverHandledLatencySecondsBuilder.register(registry));
+      } else {
+        this.serverHandledLatencySeconds = Optional.empty();
+      }
+    }
+
+    /** Creates a {@link ServerMetrics} for the supplied method. */
+    public <R, S> ServerMetrics createMetricsForMethod(MethodDescriptor<R, S> method) {
+      String serviceName = MethodDescriptor.extractFullServiceName(method.getFullMethodName());
+
+      // Full method names are of the form: "full.serviceName/MethodName". We extract the last part.
+      String methodName = method.getFullMethodName().substring(serviceName.length() + 1);
+      return new ServerMetrics(
+          method.getType().toString(),
+          serviceName,
+          methodName,
+          serverStarted,
+          serverHandled,
+          serverStreamMessagesReceived,
+          serverStreamMessagesSent,
+          serverHandledLatencySeconds);
+    }
   }
 
   private <T> T addLabels(SimpleCollector<T> collector, String... labels) {
