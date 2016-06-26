@@ -5,8 +5,6 @@ jdk:
 
 addons:
   apt:
-    sources:
-      - ubuntu-toolchain-r-test
     packages:
       - wget
 
