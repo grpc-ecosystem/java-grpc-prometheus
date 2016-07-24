@@ -40,6 +40,7 @@ class ServerMetrics {
           .subsystem("server")
           .name("handled_latency_seconds")
           .labelNames("grpc_type", "grpc_service", "grpc_method")
+          .buckets(.001, .005, .01, .05, 0.075, .1, .25, .5, 1, 2, 5, 10)
           .help("Histogram of response latency (seconds) of gRPC that had been application-level " +
               "handled by the server.");
 
