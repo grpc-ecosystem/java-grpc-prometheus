@@ -2,15 +2,7 @@
 
 package me.dinowernli.grpc.prometheus.integration;
 
-import static com.google.common.truth.Truth.assertThat;
-
 import java.io.IOException;
-import java.util.Enumeration;
-import java.util.Optional;
-
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
 
 import com.github.dinowernli.proto.grpc.prometheus.HelloProto.HelloRequest;
 import com.github.dinowernli.proto.grpc.prometheus.HelloProto.HelloResponse;
@@ -18,7 +10,6 @@ import com.github.dinowernli.proto.grpc.prometheus.HelloServiceGrpc;
 import com.github.dinowernli.proto.grpc.prometheus.HelloServiceGrpc.HelloServiceBlockingStub;
 import com.github.dinowernli.proto.grpc.prometheus.HelloServiceGrpc.HelloServiceStub;
 import com.google.common.collect.ImmutableList;
-
 import io.grpc.Channel;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
@@ -30,22 +21,21 @@ import io.grpc.testing.StreamRecorder;
 import io.grpc.testing.TestUtils;
 import io.prometheus.client.Collector.MetricFamilySamples;
 import io.prometheus.client.CollectorRegistry;
+import me.dinowernli.grpc.prometheus.Configuration;
 import me.dinowernli.grpc.prometheus.MonitoringServerInterceptor;
-import me.dinowernli.grpc.prometheus.MonitoringServerInterceptor.Configuration;
 import me.dinowernli.grpc.prometheus.testing.HelloServiceImpl;
+import me.dinowernli.grpc.prometheus.testing.RegistryHelper;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
+import static com.google.common.truth.Truth.assertThat;
 
 /**
  * Integrations tests which make sure that if a service is started with a
  * {@link MonitoringServerInterceptor}, then all Prometheus metrics get recorded correctly.
  */
-public class MonitoringInterceptorIntegrationTest {
-  private static final String SERVICE_NAME =
-      "com.github.dinowernli.proto.grpc.prometheus.HelloService";
-  private static final String UNARY_METHOD_NAME = "SayHello";
-  private static final String CLIENT_STREAM_METHOD_NAME = "SayHelloClientStream";
-  private static final String SERVER_STREAM_METHOD_NAME = "SayHelloServerStream";
-  private static final String BIDI_STREAM_METHOD_NAME = "SayHelloBidiStream";
-
+public class MonitoringServerInterceptorIntegrationTest {
   private static final String RECIPIENT = "Dave";
   private static final HelloRequest REQUEST = HelloRequest.newBuilder()
       .setRecipient(RECIPIENT)
@@ -80,7 +70,7 @@ public class MonitoringInterceptorIntegrationTest {
     MetricFamilySamples handled = findRecordedMetricOrThrow("grpc_server_handled_total");
     assertThat(handled.samples).hasSize(1);
     assertThat(handled.samples.get(0).labelValues).containsExactly(
-        "UNARY", SERVICE_NAME, UNARY_METHOD_NAME, "OK");
+        "UNARY", HelloServiceImpl.SERVICE_NAME, HelloServiceImpl.UNARY_METHOD_NAME, "OK");
     assertThat(handled.samples.get(0).value).isWithin(0).of(1);
   }
 
@@ -104,7 +94,10 @@ public class MonitoringInterceptorIntegrationTest {
     MetricFamilySamples handled = findRecordedMetricOrThrow("grpc_server_handled_total");
     assertThat(handled.samples).hasSize(1);
     assertThat(handled.samples.get(0).labelValues).containsExactly(
-        "CLIENT_STREAMING", SERVICE_NAME, CLIENT_STREAM_METHOD_NAME, "OK");
+        "CLIENT_STREAMING",
+        HelloServiceImpl.SERVICE_NAME,
+        HelloServiceImpl.CLIENT_STREAM_METHOD_NAME,
+        "OK");
     assertThat(handled.samples.get(0).value).isWithin(0).of(1);
   }
 
@@ -121,12 +114,17 @@ public class MonitoringInterceptorIntegrationTest {
     MetricFamilySamples handled = findRecordedMetricOrThrow("grpc_server_handled_total");
     assertThat(handled.samples).hasSize(1);
     assertThat(handled.samples.get(0).labelValues).containsExactly(
-        "SERVER_STREAMING", SERVICE_NAME, SERVER_STREAM_METHOD_NAME, "OK");
+        "SERVER_STREAMING",
+        HelloServiceImpl.SERVICE_NAME,
+        HelloServiceImpl.SERVER_STREAM_METHOD_NAME,
+        "OK");
     assertThat(handled.samples.get(0).value).isWithin(0).of(1);
 
     MetricFamilySamples messagesSent = findRecordedMetricOrThrow("grpc_server_msg_sent_total");
     assertThat(messagesSent.samples.get(0).labelValues).containsExactly(
-        "SERVER_STREAMING", SERVICE_NAME, SERVER_STREAM_METHOD_NAME);
+        "SERVER_STREAMING",
+        HelloServiceImpl.SERVICE_NAME,
+        HelloServiceImpl.SERVER_STREAM_METHOD_NAME);
     assertThat(messagesSent.samples.get(0).value).isWithin(0).of(responses.size());
   }
 
@@ -150,7 +148,10 @@ public class MonitoringInterceptorIntegrationTest {
     MetricFamilySamples handled = findRecordedMetricOrThrow("grpc_server_handled_total");
     assertThat(handled.samples).hasSize(1);
     assertThat(handled.samples.get(0).labelValues).containsExactly(
-        "BIDI_STREAMING", SERVICE_NAME, BIDI_STREAM_METHOD_NAME, "OK");
+        "BIDI_STREAMING",
+        HelloServiceImpl.SERVICE_NAME,
+        HelloServiceImpl.BIDI_STREAM_METHOD_NAME,
+        "OK");
     assertThat(handled.samples.get(0).value).isWithin(0).of(1);
   }
 
@@ -158,7 +159,8 @@ public class MonitoringInterceptorIntegrationTest {
   public void noHistogramIfDisabled() throws Throwable {
     startGrpcServer(CHEAP_METRICS);
     createGrpcBlockingStub().sayHello(REQUEST);
-    assertThat(findRecordedMetric("grpc_server_handled_latency_seconds").isPresent()).isFalse();
+    assertThat(RegistryHelper.findRecordedMetric(
+        "grpc_server_handled_latency_seconds", collectorRegistry).isPresent()).isFalse();
   }
 
   @Test
@@ -205,23 +207,8 @@ public class MonitoringInterceptorIntegrationTest {
     }
   }
 
-  private Optional<MetricFamilySamples> findRecordedMetric(String name) {
-    Enumeration<MetricFamilySamples> samples = collectorRegistry.metricFamilySamples();
-    while (samples.hasMoreElements()) {
-      MetricFamilySamples sample = samples.nextElement();
-      if (sample.name.equals(name)) {
-        return Optional.of(sample);
-      }
-    }
-    return Optional.empty();
-  }
-
   private MetricFamilySamples findRecordedMetricOrThrow(String name) {
-    Optional<MetricFamilySamples> result = findRecordedMetric(name);
-    if (!result.isPresent()){
-      throw new IllegalArgumentException("Could not find metric with name: " + name);
-    }
-    return result.get();
+    return RegistryHelper.findRecordedMetricOrThrow(name, collectorRegistry);
   }
 
   private HelloServiceBlockingStub createGrpcBlockingStub() {
