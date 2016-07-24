@@ -1,3 +1,5 @@
 bazel-*
 .classpath
 .project
+.idea*
+project.iml
