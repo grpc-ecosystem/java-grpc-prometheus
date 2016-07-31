@@ -23,6 +23,8 @@ The features of this library include two monitoring grpc interceptors, `Monitori
     
 Note that the presence or absence of the optional metrics can be configured by passing `Configuration` instance to the interceptors.
 
+The server interceptors have an identical implementation in Golang, [go-grpc-prometheus](https://github.com/mwitkow/go-grpc-prometheus), brought to you by [@MWitkow](http://twitter.com/mwitkow).
+
 ## Usage
 
 This library is made available on the [dinowernli GitHub Maven repository](https://github.com/dinowernli/maven-repos/tree/master).
