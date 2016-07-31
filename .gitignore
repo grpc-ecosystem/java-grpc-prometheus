@@ -3,3 +3,5 @@ bazel-*
 .project
 .idea*
 project.iml
+output
+*.swp
