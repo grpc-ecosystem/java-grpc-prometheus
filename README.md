@@ -6,7 +6,7 @@ Java interceptors which can be used to monitor Grpc services using Prometheus.
 
 ## Features
 
-The feature of this package includes two monitoring grpc interceptors, `MonitoringServerInterceptor` and `MonitoringClientInterceptor`. These interceptors can be attached separately to grpc servers and client stubs, respectively. For each RPC, the interceptors increment the following Prometheus metrics, broken down by method type, service name, method name, and response code:
+The features of this library include two monitoring grpc interceptors, `MonitoringServerInterceptor` and `MonitoringClientInterceptor`. These interceptors can be attached separately to grpc servers and client stubs respectively. For each RPC, the interceptors increment the following Prometheus metrics, broken down by method type, service name, method name, and response code:
 
 * Server
     * `grpc_server_started_total`: Total number of RPCs started on the server.
