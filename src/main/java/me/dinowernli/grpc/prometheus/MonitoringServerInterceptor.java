@@ -10,7 +10,7 @@ import io.grpc.ServerCall;
 import io.grpc.ServerCallHandler;
 import io.grpc.ServerInterceptor;
 
-/** An interceptor which sends stats about incoming grpc calls to Prometheus. */
+/** A {@link ServerInterceptor} which sends stats about incoming grpc calls to Prometheus. */
 public class MonitoringServerInterceptor implements ServerInterceptor {
   private final Clock clock;
   private final Configuration configuration;

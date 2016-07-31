@@ -1,8 +1,11 @@
+// Copyright 2016 Dino Wernli. All Rights Reserved. See LICENSE for licensing terms.
+
 package me.dinowernli.grpc.prometheus;
 
 import io.grpc.MethodDescriptor;
 import io.grpc.MethodDescriptor.MethodType;
 
+/** Knows how to extract information about a single grpc method. */
 class GrpcMethod {
   private final String serviceName;
   private final String methodName;

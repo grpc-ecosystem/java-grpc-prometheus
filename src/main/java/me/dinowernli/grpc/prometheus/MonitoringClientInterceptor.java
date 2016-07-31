@@ -1,3 +1,5 @@
+// Copyright 2016 Dino Wernli. All Rights Reserved. See LICENSE for licensing terms.
+
 package me.dinowernli.grpc.prometheus;
 
 import java.time.Clock;
@@ -8,6 +10,7 @@ import io.grpc.ClientCall;
 import io.grpc.ClientInterceptor;
 import io.grpc.MethodDescriptor;
 
+/** A {@link ClientInterceptor} which sends stats about incoming grpc calls to Prometheus. */
 public class MonitoringClientInterceptor implements ClientInterceptor {
   private final Clock clock;
   private final Configuration configuration;

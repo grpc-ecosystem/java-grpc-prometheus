@@ -1,3 +1,5 @@
+// Copyright 2016 Dino Wernli. All Rights Reserved. See LICENSE for licensing terms.
+
 package me.dinowernli.grpc.prometheus;
 
 import java.time.Clock;
@@ -6,6 +8,9 @@ import io.grpc.ClientCall;
 import io.grpc.ForwardingClientCall;
 import io.grpc.Metadata;
 
+/**
+ * A {@link SimpleForwardingClientCall} which increments prometheus counters for the rpc call.
+ */
 class MonitoringClientCall<R, S> extends ForwardingClientCall.SimpleForwardingClientCall<R, S> {
   private final ClientMetrics clientMetrics;
   private final GrpcMethod grpcMethod;

@@ -1,3 +1,5 @@
+// Copyright 2016 Dino Wernli. All Rights Reserved. See LICENSE for licensing terms.
+
 package me.dinowernli.grpc.prometheus.testing;
 
 import java.util.Enumeration;
@@ -6,6 +8,7 @@ import java.util.Optional;
 import io.prometheus.client.Collector;
 import io.prometheus.client.CollectorRegistry;
 
+/** Testing utilities used to deal with {@link CollectorRegistry} instances. */
 public class RegistryHelper {
   public static Optional<Collector.MetricFamilySamples> findRecordedMetric(
       String name, CollectorRegistry collectorRegistry) {

@@ -1,3 +1,5 @@
+// Copyright 2016 Dino Wernli. All Rights Reserved. See LICENSE for licensing terms.
+
 package me.dinowernli.grpc.prometheus;
 
 import java.util.ArrayList;
