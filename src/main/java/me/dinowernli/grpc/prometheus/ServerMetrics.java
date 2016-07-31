@@ -1,3 +1,5 @@
+// Copyright 2016 Dino Wernli. All Rights Reserved. See LICENSE for licensing terms.
+
 package me.dinowernli.grpc.prometheus;
 
 import java.util.ArrayList;
@@ -11,7 +13,6 @@ import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.Counter;
 import io.prometheus.client.Histogram;
 import io.prometheus.client.SimpleCollector;
-import me.dinowernli.grpc.prometheus.MonitoringServerInterceptor.Configuration;
 
 /**
  * Prometheus metric definitions used for server-side monitoring of grpc services.
@@ -64,22 +65,16 @@ class ServerMetrics {
   private final Counter serverStreamMessagesSent;
   private final Optional<Histogram> serverHandledLatencySeconds;
 
-  private final String methodTypeLabel;
-  private final String serviceNameLabel;
-  private final String methodNameLabel;
+  private final GrpcMethod method;
 
   private ServerMetrics(
-      String methodTypeLabel,
-      String serviceNameLabel,
-      String methodNameLabel,
+      GrpcMethod method,
       Counter serverStarted,
       Counter serverHandled,
       Counter serverStreamMessagesReceived,
       Counter serverStreamMessagesSent,
       Optional<Histogram> serverHandledLatencySeconds) {
-    this.methodNameLabel = methodNameLabel;
-    this.methodTypeLabel = methodTypeLabel;
-    this.serviceNameLabel = serviceNameLabel;
+    this.method = method;
     this.serverStarted = serverStarted;
     this.serverHandled = serverHandled;
     this.serverStreamMessagesReceived = serverStreamMessagesReceived;
@@ -140,15 +135,9 @@ class ServerMetrics {
     }
 
     /** Creates a {@link ServerMetrics} for the supplied method. */
-    public <R, S> ServerMetrics createMetricsForMethod(MethodDescriptor<R, S> method) {
-      String serviceName = MethodDescriptor.extractFullServiceName(method.getFullMethodName());
-
-      // Full method names are of the form: "full.serviceName/MethodName". We extract the last part.
-      String methodName = method.getFullMethodName().substring(serviceName.length() + 1);
+    <R, S> ServerMetrics createMetricsForMethod(MethodDescriptor<R, S> methodDescriptor) {
       return new ServerMetrics(
-          method.getType().toString(),
-          serviceName,
-          methodName,
+          GrpcMethod.of(methodDescriptor),
           serverStarted,
           serverHandled,
           serverStreamMessagesReceived,
@@ -159,7 +148,7 @@ class ServerMetrics {
 
   private <T> T addLabels(SimpleCollector<T> collector, String... labels) {
     List<String> allLabels = new ArrayList<>();
-    Collections.addAll(allLabels, methodTypeLabel, serviceNameLabel, methodNameLabel);
+    Collections.addAll(allLabels, method.type(), method.serviceName(), method.methodName());
     Collections.addAll(allLabels, labels);
     return collector.labels(allLabels.toArray(new String[0]));
   }

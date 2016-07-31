@@ -9,6 +9,13 @@ import com.github.dinowernli.proto.grpc.prometheus.HelloServiceGrpc.HelloService
 import io.grpc.stub.StreamObserver;
 
 public class HelloServiceImpl implements HelloService {
+  public static final String SERVICE_NAME =
+      "com.github.dinowernli.proto.grpc.prometheus.HelloService";
+  public static final String UNARY_METHOD_NAME = "SayHello";
+  public static final String CLIENT_STREAM_METHOD_NAME = "SayHelloClientStream";
+  public static final String SERVER_STREAM_METHOD_NAME = "SayHelloServerStream";
+  public static final String BIDI_STREAM_METHOD_NAME = "SayHelloBidiStream";
+
   /**
    * Indicates how many request messages we wait for before responding to the client in the case of
    * the client streamed method.
