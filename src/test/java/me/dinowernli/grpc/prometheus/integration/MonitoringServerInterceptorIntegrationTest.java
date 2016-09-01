@@ -18,7 +18,7 @@ import io.grpc.netty.NegotiationType;
 import io.grpc.netty.NettyChannelBuilder;
 import io.grpc.stub.StreamObserver;
 import io.grpc.testing.StreamRecorder;
-import io.grpc.testing.TestUtils;
+import io.grpc.benchmarks.Utils;
 import io.prometheus.client.Collector.MetricFamilySamples;
 import io.prometheus.client.CollectorRegistry;
 import me.dinowernli.grpc.prometheus.Configuration;
@@ -195,10 +195,9 @@ public class MonitoringServerInterceptorIntegrationTest {
   private void startGrpcServer(Configuration monitoringConfig) {
     MonitoringServerInterceptor interceptor = MonitoringServerInterceptor.create(
         monitoringConfig.withCollectorRegistry(collectorRegistry));
-    grpcPort = TestUtils.pickUnusedPort();
+    grpcPort = Utils.pickUnusedPort();
     grpcServer = ServerBuilder.forPort(grpcPort)
-        .addService(ServerInterceptors.intercept(
-            HelloServiceGrpc.bindService(new HelloServiceImpl()), interceptor))
+        .addService(ServerInterceptors.intercept(new HelloServiceImpl().bindService(), interceptor))
         .build();
     try {
       grpcServer.start();

@@ -1,12 +1,12 @@
 package(default_visibility = ["//visibility:public"])
 
 java_library(
-  name = "testing",
-  srcs = glob(["*.java"]),
-  testonly = 1,
-  deps = [
-    "//src/main/proto:hello_proto_grpc",
-    "//third_party/grpc",
-    "//third_party/prometheus",
-  ],
+    name = "testing",
+    testonly = 1,
+    srcs = glob(["*.java"]),
+    deps = [
+        "//src/main/proto:hello_proto_grpc",
+        "//third_party/grpc:grpc_stub",
+        "//third_party/prometheus",
+    ],
 )

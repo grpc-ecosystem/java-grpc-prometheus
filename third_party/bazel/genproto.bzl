@@ -79,7 +79,7 @@ def proto_java_library(name, src, gensrcjar_deps = [], deps = [], gen_grpc = Fal
 
   java_deps = ["//third_party/protobuf"] + deps
   if gen_grpc:
-    java_deps += ["//third_party/grpc", "//third_party/guava"]
+    java_deps += ["//third_party/grpc:grpc_core", "//third_party/grpc:grpc_protobuf", "//third_party/grpc:grpc_stub", "//third_party/guava"]
 
   native.java_library(
     name=name,
