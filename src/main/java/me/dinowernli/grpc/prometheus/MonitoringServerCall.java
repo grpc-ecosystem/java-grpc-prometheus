@@ -14,7 +14,7 @@ import io.grpc.Status;
  * A {@link ForwardingServerCall} which updates Prometheus metrics based on the server-side actions
  * taken for a single rpc, e.g., messages sent, latency, etc.
  */
-class MonitoringServerCall<S> extends ForwardingServerCall.SimpleForwardingServerCall<S> {
+class MonitoringServerCall<R,S> extends ForwardingServerCall.SimpleForwardingServerCall<R,S> {
   private static final long MILLIS_PER_SECOND = 1000L;
 
   private final Clock clock;
@@ -24,7 +24,7 @@ class MonitoringServerCall<S> extends ForwardingServerCall.SimpleForwardingServe
   private final Instant startInstant;
 
   MonitoringServerCall(
-      ServerCall<S> delegate,
+      ServerCall<R,S> delegate,
       Clock clock,
       GrpcMethod grpcMethod,
       ServerMetrics serverMetrics,
