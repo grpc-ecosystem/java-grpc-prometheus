@@ -43,6 +43,11 @@ maven_jar(
 )
 
 maven_jar(
+  name = "grpc_protobuf_lite_artifact",
+  artifact = "io.grpc:grpc-protobuf-lite:1.0.0",
+)
+
+maven_jar(
   name = "grpc_stub_artifact",
   artifact = "io.grpc:grpc-stub:1.0.0",
 )
@@ -64,7 +69,7 @@ maven_jar(
 
 maven_jar(
   name = "netty_artifact",
-  artifact = "io.netty:netty-all:4.1.0.CR3",
+  artifact = "io.netty:netty-all:4.1.5.Final",
 )
 
 maven_jar(
