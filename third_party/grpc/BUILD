@@ -33,6 +33,14 @@ java_library(
 )
 
 java_library(
+    name = "grpc_protobuf_lite",
+    licenses = ["permissive"],
+    exports = [
+        "@grpc_protobuf_lite_artifact//jar",
+    ],
+)
+
+java_library(
     name = "grpc_stub",
     licenses = ["permissive"],
     exports = [

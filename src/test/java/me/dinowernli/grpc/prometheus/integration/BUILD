@@ -9,6 +9,7 @@ java_test(
         "//third_party/grpc:grpc_benchmarks",
         "//third_party/grpc:grpc_core",
         "//third_party/grpc:grpc_netty",
+        "//third_party/grpc:grpc_protobuf_lite",
         "//third_party/grpc:grpc_stub",
         "//third_party/grpc:grpc_testing",
         "//third_party/guava",
