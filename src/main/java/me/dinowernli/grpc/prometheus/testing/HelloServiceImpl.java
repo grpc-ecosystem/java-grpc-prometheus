@@ -4,11 +4,11 @@ package me.dinowernli.grpc.prometheus.testing;
 
 import com.github.dinowernli.proto.grpc.prometheus.HelloProto.HelloRequest;
 import com.github.dinowernli.proto.grpc.prometheus.HelloProto.HelloResponse;
-import com.github.dinowernli.proto.grpc.prometheus.HelloServiceGrpc.HelloService;
+import com.github.dinowernli.proto.grpc.prometheus.HelloServiceGrpc.HelloServiceImplBase;
 
 import io.grpc.stub.StreamObserver;
 
-public class HelloServiceImpl implements HelloService {
+public class HelloServiceImpl extends HelloServiceImplBase {
   public static final String SERVICE_NAME =
       "com.github.dinowernli.proto.grpc.prometheus.HelloService";
   public static final String UNARY_METHOD_NAME = "SayHello";

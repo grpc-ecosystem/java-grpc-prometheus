@@ -1,13 +1,13 @@
 http_file(
   name = "gen_java_grpc_linux_x86_64",
-  url = "https://repo1.maven.org/maven2/io/grpc/protoc-gen-grpc-java/0.13.2/protoc-gen-grpc-java-0.13.2-linux-x86_64.exe",
-  sha256 = "188fe7e975f75af6931dd36427dca1b5f7b43797dc406ef8d852b31df846f1d6",
+  url = "https://repo1.maven.org/maven2/io/grpc/protoc-gen-grpc-java/1.0.0/protoc-gen-grpc-java-1.0.0-linux-x86_64.exe",
+  sha256 = "4c16cd65e63a92f11f8a24c26a8b418ea6312484d341f66e94d4b5aa27e6e57b",
 )
 
 http_file(
   name = "gen_java_grpc_osx_x86_64",
-  url = "https://repo1.maven.org/maven2/io/grpc/protoc-gen-grpc-java/0.13.2/protoc-gen-grpc-java-0.13.2-osx-x86_64.exe",
-  sha256 = "6318405813e19b62d0555b569df7dcd6bbddcfe8c3b58c9aed6ca0d3737ab9e3",
+  url = "https://repo1.maven.org/maven2/io/grpc/protoc-gen-grpc-java/1.0.0/protoc-gen-grpc-java-1.0.0-osx-x86_64.exe",
+  sha256 = "306ea54a8c84874c880edeb454d92b4c8eed6f60affb1dfb0047532c62754253",
 )
 
 http_file(
@@ -23,13 +23,38 @@ http_file(
 )
 
 maven_jar(
-  name = "grpc_all_artifact",
-  artifact = "io.grpc:grpc-all:0.13.2",
+  name = "grpc_benchmarks_artifact",
+  artifact = "io.grpc:grpc-benchmarks:1.0.0",
+)
+
+maven_jar(
+  name = "grpc_core_artifact",
+  artifact = "io.grpc:grpc-core:1.0.0",
+)
+
+maven_jar(
+  name = "grpc_netty_artifact",
+  artifact = "io.grpc:grpc-netty:1.0.0",
+)
+
+maven_jar(
+  name = "grpc_protobuf_artifact",
+  artifact = "io.grpc:grpc-protobuf:1.0.0",
+)
+
+maven_jar(
+  name = "grpc_protobuf_lite_artifact",
+  artifact = "io.grpc:grpc-protobuf-lite:1.0.0",
+)
+
+maven_jar(
+  name = "grpc_stub_artifact",
+  artifact = "io.grpc:grpc-stub:1.0.0",
 )
 
 maven_jar(
   name = "grpc_testing_artifact",
-  artifact = "io.grpc:grpc-testing:0.13.2",
+  artifact = "io.grpc:grpc-testing:1.0.0",
 )
 
 maven_jar(
@@ -44,7 +69,7 @@ maven_jar(
 
 maven_jar(
   name = "netty_artifact",
-  artifact = "io.netty:netty-all:4.1.0.CR3",
+  artifact = "io.netty:netty-all:4.1.5.Final",
 )
 
 maven_jar(
