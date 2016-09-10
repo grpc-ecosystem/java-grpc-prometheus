@@ -38,7 +38,6 @@ class ClientMetrics {
           .subsystem("client")
           .name("completed_latency_seconds")
           .labelNames("grpc_type", "grpc_service", "grpc_method")
-          .buckets(.001, .005, .01, .05, 0.075, .1, .25, .5, 1, 2, 5, 10)
           .help("Histogram of rpc response latency (in seconds) for completed rpcs.");
 
   private static final Counter.Builder streamMessagesReceivedBuilder = Counter.build()
@@ -123,8 +122,9 @@ class ClientMetrics {
       this.streamMessagesSent = streamMessagesSentBuilder.register(registry);
 
       if (configuration.isIncludeLatencyHistograms()) {
-        this.completedLatencySeconds =
-            Optional.of(completedLatencySecondsBuilder.register(registry));
+        this.completedLatencySeconds = Optional.of(ClientMetrics.completedLatencySecondsBuilder
+            .buckets(configuration.getLatencyBuckets())
+            .register(registry));
       } else {
         this.completedLatencySeconds = Optional.empty();
       }

@@ -14,11 +14,11 @@ import io.grpc.Channel;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
 import io.grpc.ServerInterceptors;
+import io.grpc.benchmarks.Utils;
 import io.grpc.netty.NegotiationType;
 import io.grpc.netty.NettyChannelBuilder;
 import io.grpc.stub.StreamObserver;
 import io.grpc.testing.StreamRecorder;
-import io.grpc.benchmarks.Utils;
 import io.prometheus.client.Collector.MetricFamilySamples;
 import io.prometheus.client.CollectorRegistry;
 import me.dinowernli.grpc.prometheus.Configuration;
@@ -173,6 +173,18 @@ public class MonitoringServerInterceptorIntegrationTest {
   }
 
   @Test
+  public void overridesHistogramBuckets() throws Throwable {
+    double[] buckets = new double[] {0.1, 0.2, 0.8};
+    startGrpcServer(ALL_METRICS.withLatencyBuckets(buckets));
+    createGrpcBlockingStub().sayHello(REQUEST);
+
+    long expectedNum = buckets.length + 1;  // Our two buckets and the Inf buckets.
+    assertThat(countSamples(
+        "grpc_server_handled_latency_seconds",
+        "grpc_server_handled_latency_seconds_bucket")).isEqualTo(expectedNum);
+  }
+
+  @Test
   public void recordsMultipleCalls() throws Throwable {
     startGrpcServer(CHEAP_METRICS);
 
@@ -212,6 +224,10 @@ public class MonitoringServerInterceptorIntegrationTest {
 
   private HelloServiceBlockingStub createGrpcBlockingStub() {
     return HelloServiceGrpc.newBlockingStub(createGrpcChannel());
+  }
+
+  private int countSamples(String metricName, String sampleName) {
+    return RegistryHelper.countSamples(metricName, sampleName, collectorRegistry);
   }
 
   private HelloServiceStub createGrpcStub() {
