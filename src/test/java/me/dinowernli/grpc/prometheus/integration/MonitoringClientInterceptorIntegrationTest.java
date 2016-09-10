@@ -8,10 +8,10 @@ import com.github.dinowernli.proto.grpc.prometheus.HelloServiceGrpc;
 import com.github.dinowernli.proto.grpc.prometheus.HelloServiceGrpc.HelloServiceStub;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
+import io.grpc.benchmarks.Utils;
 import io.grpc.netty.NettyChannelBuilder;
 import io.grpc.stub.StreamObserver;
 import io.grpc.testing.StreamRecorder;
-import io.grpc.benchmarks.Utils;
 import io.prometheus.client.Collector;
 import io.prometheus.client.CollectorRegistry;
 import me.dinowernli.grpc.prometheus.Configuration;
@@ -159,6 +159,20 @@ public class MonitoringClientInterceptorIntegrationTest {
     assertThat(latency.samples.size()).isGreaterThan(0);
   }
 
+  @Test
+  public void overridesHistogramBuckets() throws Throwable {
+    double[] buckets = new double[] {0.1, 0.2};
+    createClientStub(ALL_METRICS.withLatencyBuckets(buckets)).sayHello(
+        HelloProto.HelloRequest.getDefaultInstance(), responseRecorder);
+    responseRecorder.awaitCompletion();
+
+    long expectedNum = buckets.length + 1;  // Our two buckets and the Inf buckets.
+    assertThat(countSamples(
+        "grpc_client_completed_latency_seconds",
+        "grpc_client_completed_latency_seconds_bucket")).isEqualTo(expectedNum);
+  }
+
+
   private HelloServiceStub createClientStub(Configuration configuration) {
     return HelloServiceGrpc.newStub(NettyChannelBuilder.forAddress("localhost", grpcPort)
         .usePlaintext(true)
@@ -185,5 +199,9 @@ public class MonitoringClientInterceptorIntegrationTest {
 
   private Collector.MetricFamilySamples findRecordedMetricOrThrow(String name) {
     return RegistryHelper.findRecordedMetricOrThrow(name, collectorRegistry);
+  }
+
+  private int countSamples(String metricName, String sampleName) {
+    return RegistryHelper.countSamples(metricName, sampleName, collectorRegistry);
   }
 }

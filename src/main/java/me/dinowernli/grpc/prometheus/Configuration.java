@@ -2,8 +2,6 @@
 
 package me.dinowernli.grpc.prometheus;
 
-import java.util.Optional;
-
 import io.prometheus.client.CollectorRegistry;
 
 /**
@@ -11,13 +9,19 @@ import io.prometheus.client.CollectorRegistry;
  * turn on more elaborate and expensive metrics, such as latency histograms.
  */
 public class Configuration {
+  private static double[] DEFAULT_LATENCY_BUCKETS =
+      new double[] {.001, .005, .01, .05, 0.075, .1, .25, .5, 1, 2, 5, 10};
+
   private final boolean isIncludeLatencyHistograms;
-  private final Optional<CollectorRegistry> collectorRegistry;
+  private final CollectorRegistry collectorRegistry;
+  private final double[] latencyBuckets;
 
   /** Returns a {@link Configuration} for recording all cheap metrics about the rpcs. */
   public static Configuration cheapMetricsOnly() {
     return new Configuration(
-        false /* isIncludeLatencyHistograms */, Optional.empty() /* collectorRegistry */);
+        false /* isIncludeLatencyHistograms */,
+        CollectorRegistry.defaultRegistry,
+        DEFAULT_LATENCY_BUCKETS);
   }
 
   /**
@@ -26,7 +30,9 @@ public class Configuration {
    */
   public static Configuration allMetrics() {
     return new Configuration(
-        true /* isIncludeLatencyHistograms */, Optional.empty() /* collectorRegistry */);
+        true /* isIncludeLatencyHistograms */,
+        CollectorRegistry.defaultRegistry,
+        DEFAULT_LATENCY_BUCKETS);
   }
 
   /**
@@ -34,7 +40,15 @@ public class Configuration {
    * recorded using the supplied {@link CollectorRegistry}.
    */
   public Configuration withCollectorRegistry(CollectorRegistry collectorRegistry) {
-    return new Configuration(isIncludeLatencyHistograms, Optional.of(collectorRegistry));
+    return new Configuration(isIncludeLatencyHistograms, collectorRegistry, latencyBuckets);
+  }
+
+  /**
+   * Returns a copy {@link Configuration} with the difference that the latency histogram values are
+   * recorded with the specified set of buckets.
+   */
+  public Configuration withLatencyBuckets(double[] buckets) {
+    return new Configuration(isIncludeLatencyHistograms, collectorRegistry, buckets);
   }
 
   /** Returns whether or not latency histograms for calls should be included. */
@@ -44,12 +58,20 @@ public class Configuration {
 
   /** Returns the {@link CollectorRegistry} used to record stats. */
   public CollectorRegistry getCollectorRegistry() {
-    return collectorRegistry.orElse(CollectorRegistry.defaultRegistry);
+    return collectorRegistry;
+  }
+
+  /** Returns the histogram buckets to use for latency metrics. */
+  public double[] getLatencyBuckets() {
+    return latencyBuckets;
   }
 
   private Configuration(
-      boolean isIncludeLatencyHistograms, Optional<CollectorRegistry> collectorRegistry) {
+      boolean isIncludeLatencyHistograms,
+      CollectorRegistry collectorRegistry,
+      double[] latencyBuckets) {
     this.isIncludeLatencyHistograms = isIncludeLatencyHistograms;
     this.collectorRegistry = collectorRegistry;
+    this.latencyBuckets = latencyBuckets;
   }
 }

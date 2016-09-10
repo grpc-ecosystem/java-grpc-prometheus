@@ -39,4 +39,33 @@ public class RegistryHelper {
     }
     return result.samples.get(0).value;
   }
+
+  public static int countSamples(
+      String metricName, String sampleName, CollectorRegistry collectorRegistry) {
+    Enumeration<Collector.MetricFamilySamples> samples = collectorRegistry.metricFamilySamples();
+    while (samples.hasMoreElements()) {
+      Collector.MetricFamilySamples sample = samples.nextElement();
+      if (sample.name.equals(metricName)) {
+        int result = 0;
+        for (Collector.MetricFamilySamples.Sample s : sample.samples) {
+          if (s.name.equals(sampleName)) {
+            ++result;
+          }
+        }
+        return result;
+      }
+    }
+    throw new IllegalArgumentException("Could not find sample family with name: " + metricName);
+  }
+
+  public static void printRegistry(CollectorRegistry collectorRegistry) {
+    Enumeration<Collector.MetricFamilySamples> samples = collectorRegistry.metricFamilySamples();
+    while (samples.hasMoreElements()) {
+      printSamples(samples.nextElement());
+    }
+  }
+
+  private static void printSamples(Collector.MetricFamilySamples samples) {
+    System.out.println(samples.toString());
+  }
 }
