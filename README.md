@@ -21,7 +21,10 @@ The features of this library include two monitoring grpc interceptors, `Monitori
     * `grpc_client_msg_received_total`: Total number of stream messages received from the server.
     * `grpc_client_msg_sent_total`: Total number of stream messages sent by the client.
     
-Note that the presence or absence of the optional metrics can be configured by passing `Configuration` instance to the interceptors.
+Note that by passing a `Configuration` instance to the interceptors, it is possible to configure the following:
+* Whether or not a latency histogram is recroded for rpcs.
+* Which historam buckets to use for the latency metrics.
+* Which Prometheus `CollectorRegistry` the metrics get registered with.
 
 The server interceptors have an identical implementation in Golang, [go-grpc-prometheus](https://github.com/mwitkow/go-grpc-prometheus), brought to you by [@MWitkow](http://twitter.com/mwitkow).
 
