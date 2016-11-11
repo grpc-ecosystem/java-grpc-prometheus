@@ -2,17 +2,17 @@
 
 package me.dinowernli.grpc.prometheus;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-
 import io.grpc.MethodDescriptor;
 import io.grpc.Status.Code;
 import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.Counter;
 import io.prometheus.client.Histogram;
 import io.prometheus.client.SimpleCollector;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 
 /**
  * Prometheus metric definitions used for server-side monitoring of grpc services.
@@ -32,7 +32,7 @@ class ServerMetrics {
       .namespace("grpc")
       .subsystem("server")
       .name("handled_total")
-      .labelNames("grpc_type", "grpc_service", "grpc_method", "code")
+      .labelNames("grpc_type", "grpc_service", "grpc_method", "grpc_code")
       .help("Total number of RPCs completed on the server, regardless of success or failure.");
 
   private static final Histogram.Builder serverHandledLatencySecondsBuilder =
