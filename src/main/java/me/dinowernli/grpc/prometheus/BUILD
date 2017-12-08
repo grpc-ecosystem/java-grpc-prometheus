@@ -4,8 +4,7 @@ java_library(
     name = "prometheus",
     srcs = glob(["*.java"]),
     deps = [
-        "//third_party/grpc:grpc_core",
-        "//third_party/grpc:grpc_stub",
+        "//third_party/grpc",
         "//third_party/prometheus",
     ],
 )

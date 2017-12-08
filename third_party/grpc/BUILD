@@ -1,50 +1,18 @@
 package(default_visibility = ["//visibility:public"])
 
 java_library(
-    name = "grpc_benchmarks",
+    name = "grpc",
     licenses = ["permissive"],
     exports = [
-        "@grpc_benchmarks_artifact//jar",
-    ],
-)
-
-java_library(
-    name = "grpc_core",
-    licenses = ["permissive"],
-    exports = [
-        "@grpc_core_artifact//jar",
-    ],
-)
-
-java_library(
-    name = "grpc_netty",
-    licenses = ["permissive"],
-    exports = [
-        "@grpc_netty_artifact//jar",
-    ],
-)
-
-java_library(
-    name = "grpc_protobuf",
-    licenses = ["permissive"],
-    exports = [
-        "@grpc_protobuf_artifact//jar",
-    ],
-)
-
-java_library(
-    name = "grpc_protobuf_lite",
-    licenses = ["permissive"],
-    exports = [
-        "@grpc_protobuf_lite_artifact//jar",
-    ],
-)
-
-java_library(
-    name = "grpc_stub",
-    licenses = ["permissive"],
-    exports = [
-        "@grpc_stub_artifact//jar",
+        "@com_google_instrumentation_instrumentation_api//jar",
+        "@io_grpc_grpc_benchmarks//jar",
+        "@io_grpc_grpc_context//jar",
+        "@io_grpc_grpc_core//jar",
+        "@io_grpc_grpc_netty//jar",
+        "@io_grpc_grpc_protobuf//jar",
+        "@io_grpc_grpc_protobuf_lite//jar",
+        "@io_grpc_grpc_stub//jar",
+        "@io_grpc_grpc_okhttp//jar",
     ],
 )
 
