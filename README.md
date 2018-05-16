@@ -34,7 +34,7 @@ This library is made available on the [dinowernli GitHub Maven repository](https
 Once the repository is set up, the library can be included using the following artifact id:
 
 ```
-me.dinowernli:java-grpc-prometheus:0.1.0
+me.dinowernli:java-grpc-prometheus:0.3.0
 ```
 
 In order to attach the monitoring server interceptor to your gRPC server, you can do the following:
@@ -57,6 +57,18 @@ grpcStub = HelloServiceGrpc.newStub(NettyChannelBuilder.forAddress(REMOTE_HOST, 
     .intercept(monitoringInterceptor)
     .build());
 ```
+
+If you're using Spring Boot 2 with micrometer-registry-prometheus you should inject the CollectorRegistry that is already provided in the application context:
+
+```java
+@Autowired
+private CollectorRegistry collectorRegistry;
+
+// use the provided registry 
+MonitoringServerInterceptor monitoringInterceptor =  
+    MonitoringServerInterceptor.create(Configuration.cheapMetricsOnly().withCollectorRegistry(collectorRegistry));
+```
+
 
 ## Related reading
 
