@@ -134,10 +134,10 @@ class ServerMetrics {
       }
     }
 
-    /** Creates a {@link ServerMetrics} for the supplied method. */
-    <R, S> ServerMetrics createMetricsForMethod(MethodDescriptor<R, S> methodDescriptor) {
+    /** Creates a {@link ServerMetrics} for the supplied gRPC method. */
+    ServerMetrics createMetricsForMethod(GrpcMethod grpcMethod) {
       return new ServerMetrics(
-          GrpcMethod.of(methodDescriptor),
+          grpcMethod,
           serverStarted,
           serverHandled,
           serverStreamMessagesReceived,

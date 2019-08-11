@@ -130,10 +130,10 @@ class ClientMetrics {
       }
     }
 
-    /** Creates a {@link ClientMetrics} for the supplied method. */
-    <R, S> ClientMetrics createMetricsForMethod(MethodDescriptor<R, S> methodDescriptor) {
+    /** Creates a {@link ClientMetrics} for the supplied gRPC method. */
+    ClientMetrics createMetricsForMethod(GrpcMethod grpcMethod) {
       return new ClientMetrics(
-          GrpcMethod.of(methodDescriptor),
+          grpcMethod,
           rpcStarted,
           rpcCompleted,
           streamMessagesReceived,

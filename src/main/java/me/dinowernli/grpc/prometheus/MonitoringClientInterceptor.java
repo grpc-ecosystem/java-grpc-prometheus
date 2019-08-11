@@ -33,11 +33,12 @@ public class MonitoringClientInterceptor implements ClientInterceptor {
   @Override
   public <R, S> ClientCall<R, S> interceptCall(
       MethodDescriptor<R, S> methodDescriptor, CallOptions callOptions, Channel channel) {
-    ClientMetrics metrics = clientMetricsFactory.createMetricsForMethod(methodDescriptor);
+    GrpcMethod grpcMethod = GrpcMethod.of(methodDescriptor);
+    ClientMetrics metrics = clientMetricsFactory.createMetricsForMethod(grpcMethod);
     return new MonitoringClientCall<>(
         channel.newCall(methodDescriptor, callOptions),
         metrics,
-        GrpcMethod.of(methodDescriptor),
+        grpcMethod,
         configuration,
         clock);
   }
