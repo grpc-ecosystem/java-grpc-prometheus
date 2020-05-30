@@ -1,15 +1,12 @@
 package me.dinowernli.grpc.prometheus.integration;
 
-import java.io.IOException;
-
 import com.github.dinowernli.proto.grpc.prometheus.HelloProto;
 import com.github.dinowernli.proto.grpc.prometheus.HelloProto.HelloResponse;
 import com.github.dinowernli.proto.grpc.prometheus.HelloServiceGrpc;
 import com.github.dinowernli.proto.grpc.prometheus.HelloServiceGrpc.HelloServiceStub;
 import io.grpc.Server;
-import io.grpc.ServerBuilder;
-import io.grpc.benchmarks.Utils;
-import io.grpc.netty.NettyChannelBuilder;
+import io.grpc.inprocess.InProcessChannelBuilder;
+import io.grpc.inprocess.InProcessServerBuilder;
 import io.grpc.stub.StreamObserver;
 import io.grpc.testing.StreamRecorder;
 import io.prometheus.client.Collector;
@@ -22,10 +19,13 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.IOException;
+
 import static com.google.common.truth.Truth.assertThat;
 
 /** Integration tests for the client-side monitoring pipeline. */
 public class MonitoringClientInterceptorIntegrationTest {
+  public static final String grpcServerName = "grpc-server";
   private static final Configuration CHEAP_METRICS = Configuration.cheapMetricsOnly();
   private static final Configuration ALL_METRICS = Configuration.allMetrics();
 
@@ -34,7 +34,6 @@ public class MonitoringClientInterceptorIntegrationTest {
       .setRecipient(RECIPIENT)
       .build();
 
-  private int grpcPort;
   private Server grpcServer;
   private CollectorRegistry collectorRegistry;
   private StreamRecorder<HelloResponse> responseRecorder;
@@ -174,16 +173,15 @@ public class MonitoringClientInterceptorIntegrationTest {
 
 
   private HelloServiceStub createClientStub(Configuration configuration) {
-    return HelloServiceGrpc.newStub(NettyChannelBuilder.forAddress("localhost", grpcPort)
-        .usePlaintext(true)
+    return HelloServiceGrpc.newStub(InProcessChannelBuilder.forName(grpcServerName)
+        .usePlaintext()
         .intercept(MonitoringClientInterceptor.create(
             configuration.withCollectorRegistry(collectorRegistry)))
         .build());
   }
 
   private void startServer() {
-    grpcPort = Utils.pickUnusedPort();
-    grpcServer = ServerBuilder.forPort(grpcPort)
+    grpcServer = InProcessServerBuilder.forName(grpcServerName)
         .addService(new HelloServiceImpl().bindService())
         .build();
     try {

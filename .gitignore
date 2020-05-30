@@ -5,3 +5,4 @@ bazel-*
 project.iml
 output
 *.swp
+.ijwb
