@@ -8,8 +8,8 @@ java_test(
     deps = [
         "//src/main/java/me/dinowernli/grpc/prometheus",
         "//src/main/java/me/dinowernli/grpc/prometheus/testing",
-        "//src/main/proto:hello_proto_grpc",
         "//src/main/proto:hello_java_proto",
+        "//src/main/proto:hello_proto_grpc",
         "//third_party/grpc",
         "//third_party/grpc:grpc_testing",
         "//third_party/guava",
@@ -26,8 +26,8 @@ java_test(
     deps = [
         "//src/main/java/me/dinowernli/grpc/prometheus",
         "//src/main/java/me/dinowernli/grpc/prometheus/testing",
-        "//src/main/proto:hello_proto_grpc",
         "//src/main/proto:hello_java_proto",
+        "//src/main/proto:hello_proto_grpc",
         "//third_party/grpc",
         "//third_party/grpc:grpc_testing",
         "//third_party/guava",

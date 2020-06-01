@@ -14,9 +14,8 @@ java_proto_library(
     deps = [":hello_proto"],
 )
 
-
 java_grpc_library(
     name = "hello_proto_grpc",
-    srcs =[":hello_proto"],
+    srcs = [":hello_proto"],
     deps = [":hello_java_proto"],
 )

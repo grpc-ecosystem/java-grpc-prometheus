@@ -6,10 +6,10 @@ java_library(
     name = "grpc",
     licenses = ["permissive"],
     exports = [
-        "@maven//:io_grpc_grpc_api",
-        "@maven//:io_grpc_grpc_core",
-        "@maven//:io_grpc_grpc_netty",
-        "@maven//:io_grpc_grpc_stub",
+        "@io_grpc_grpc_java//api",
+        "@io_grpc_grpc_java//core",
+        "@io_grpc_grpc_java//netty",
+        "@io_grpc_grpc_java//stub",
     ],
 )
 
@@ -18,6 +18,6 @@ java_library(
     testonly = 1,
     licenses = ["permissive"],
     exports = [
-        "@maven//:io_grpc_grpc_testing",
+        "@io_grpc_grpc_java//testing",
     ],
 )
