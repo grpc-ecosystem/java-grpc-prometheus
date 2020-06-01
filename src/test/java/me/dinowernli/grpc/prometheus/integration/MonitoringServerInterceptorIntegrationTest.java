@@ -34,7 +34,7 @@ import static com.google.common.truth.Truth.assertThat;
  * {@link MonitoringServerInterceptor}, then all Prometheus metrics get recorded correctly.
  */
 public class MonitoringServerInterceptorIntegrationTest {
-  public static final String grpcServerName = "grpc-server";
+  private static final String grpcServerName = "grpc-server";
   private static final String RECIPIENT = "Dave";
   private static final HelloRequest REQUEST = HelloRequest.newBuilder()
       .setRecipient(RECIPIENT)

@@ -25,7 +25,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 /** Integration tests for the client-side monitoring pipeline. */
 public class MonitoringClientInterceptorIntegrationTest {
-  public static final String grpcServerName = "grpc-server";
+  private static final String grpcServerName = "grpc-server";
   private static final Configuration CHEAP_METRICS = Configuration.cheapMetricsOnly();
   private static final Configuration ALL_METRICS = Configuration.allMetrics();
 
