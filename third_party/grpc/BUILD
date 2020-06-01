@@ -1,18 +1,15 @@
+load("@rules_java//java:defs.bzl", "java_library")
+
 package(default_visibility = ["//visibility:public"])
 
 java_library(
     name = "grpc",
     licenses = ["permissive"],
     exports = [
-        "@com_google_instrumentation_instrumentation_api//jar",
-        "@io_grpc_grpc_benchmarks//jar",
-        "@io_grpc_grpc_context//jar",
-        "@io_grpc_grpc_core//jar",
-        "@io_grpc_grpc_netty//jar",
-        "@io_grpc_grpc_protobuf//jar",
-        "@io_grpc_grpc_protobuf_lite//jar",
-        "@io_grpc_grpc_stub//jar",
-        "@io_grpc_grpc_okhttp//jar",
+        "@io_grpc_grpc_java//api",
+        "@io_grpc_grpc_java//core",
+        "@io_grpc_grpc_java//netty",
+        "@io_grpc_grpc_java//stub",
     ],
 )
 
@@ -21,6 +18,6 @@ java_library(
     testonly = 1,
     licenses = ["permissive"],
     exports = [
-        "@grpc_testing_artifact//jar",
+        "@io_grpc_grpc_java//testing",
     ],
 )

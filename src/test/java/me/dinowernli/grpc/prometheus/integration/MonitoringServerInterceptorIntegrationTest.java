@@ -2,8 +2,6 @@
 
 package me.dinowernli.grpc.prometheus.integration;
 
-import java.io.IOException;
-
 import com.github.dinowernli.proto.grpc.prometheus.HelloProto.HelloRequest;
 import com.github.dinowernli.proto.grpc.prometheus.HelloProto.HelloResponse;
 import com.github.dinowernli.proto.grpc.prometheus.HelloServiceGrpc;
@@ -12,11 +10,9 @@ import com.github.dinowernli.proto.grpc.prometheus.HelloServiceGrpc.HelloService
 import com.google.common.collect.ImmutableList;
 import io.grpc.Channel;
 import io.grpc.Server;
-import io.grpc.ServerBuilder;
 import io.grpc.ServerInterceptors;
-import io.grpc.benchmarks.Utils;
-import io.grpc.netty.NegotiationType;
-import io.grpc.netty.NettyChannelBuilder;
+import io.grpc.inprocess.InProcessChannelBuilder;
+import io.grpc.inprocess.InProcessServerBuilder;
 import io.grpc.stub.StreamObserver;
 import io.grpc.testing.StreamRecorder;
 import io.prometheus.client.Collector.MetricFamilySamples;
@@ -29,6 +25,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.IOException;
+
 import static com.google.common.truth.Truth.assertThat;
 
 /**
@@ -36,6 +34,7 @@ import static com.google.common.truth.Truth.assertThat;
  * {@link MonitoringServerInterceptor}, then all Prometheus metrics get recorded correctly.
  */
 public class MonitoringServerInterceptorIntegrationTest {
+  private static final String grpcServerName = "grpc-server";
   private static final String RECIPIENT = "Dave";
   private static final HelloRequest REQUEST = HelloRequest.newBuilder()
       .setRecipient(RECIPIENT)
@@ -46,7 +45,6 @@ public class MonitoringServerInterceptorIntegrationTest {
 
   private CollectorRegistry collectorRegistry;
   private Server grpcServer;
-  private int grpcPort;
 
   @Before
   public void setUp() {
@@ -207,8 +205,7 @@ public class MonitoringServerInterceptorIntegrationTest {
   private void startGrpcServer(Configuration monitoringConfig) {
     MonitoringServerInterceptor interceptor = MonitoringServerInterceptor.create(
         monitoringConfig.withCollectorRegistry(collectorRegistry));
-    grpcPort = Utils.pickUnusedPort();
-    grpcServer = ServerBuilder.forPort(grpcPort)
+    grpcServer = InProcessServerBuilder.forName(grpcServerName)
         .addService(ServerInterceptors.intercept(new HelloServiceImpl().bindService(), interceptor))
         .build();
     try {
@@ -235,8 +232,8 @@ public class MonitoringServerInterceptorIntegrationTest {
   }
 
   private Channel createGrpcChannel() {
-    return NettyChannelBuilder.forAddress("localhost", grpcPort)
-        .negotiationType(NegotiationType.PLAINTEXT)
+    return InProcessChannelBuilder.forName(grpcServerName)
+        .usePlaintext()
         .build();
   }
 }
