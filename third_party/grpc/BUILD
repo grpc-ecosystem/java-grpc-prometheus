@@ -9,6 +9,7 @@ java_library(
         "@maven//:io_grpc_grpc_api",
         "@maven//:io_grpc_grpc_core",
         "@maven//:io_grpc_grpc_netty",
+        "@maven//:io_grpc_grpc_stub",
     ],
 )
 

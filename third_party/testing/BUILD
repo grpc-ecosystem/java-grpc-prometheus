@@ -9,5 +9,6 @@ java_library(
         "@maven//:com_google_truth_truth",
         "@maven//:junit_junit",
         "@maven//:org_mockito_mockito_all",
+        "@io_grpc_grpc_java//core:inprocess"
     ],
 )

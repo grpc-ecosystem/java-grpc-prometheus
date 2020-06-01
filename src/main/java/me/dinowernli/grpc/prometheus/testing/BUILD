@@ -8,6 +8,7 @@ java_library(
     srcs = glob(["*.java"]),
     deps = [
         "//src/main/proto:hello_proto_grpc",
+        "//src/main/proto:hello_java_proto",
         "//third_party/grpc",
         "//third_party/prometheus",
     ],
