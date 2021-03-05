@@ -32,7 +32,8 @@ class ServerMetrics {
       .namespace("grpc")
       .subsystem("server")
       .name("handled_total")
-      .labelNames("grpc_type", "grpc_service", "grpc_method", "code")
+      // TODO: The "code" label should be deprecated in a future major release. (See also below in recordServerHandled().)
+      .labelNames("grpc_type", "grpc_service", "grpc_method", "code", "grpc_code")
       .help("Total number of RPCs completed on the server, regardless of success or failure.");
 
   private static final Histogram.Builder serverHandledLatencySecondsBuilder =
@@ -86,7 +87,8 @@ class ServerMetrics {
   }
 
   public void recordServerHandled(Code code) {
-    addLabels(serverHandled, code.toString()).inc();
+    // TODO: The "code" label should be deprecated in a future major release.
+    addLabels(serverHandled, code.toString(), code.toString()).inc();
   }
 
   public void recordStreamMessageSent() {
