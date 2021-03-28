@@ -68,7 +68,8 @@ public class MonitoringServerInterceptorIntegrationTest {
     MetricFamilySamples handled = findRecordedMetricOrThrow("grpc_server_handled_total");
     assertThat(handled.samples).hasSize(1);
     assertThat(handled.samples.get(0).labelValues).containsExactly(
-        "UNARY", HelloServiceImpl.SERVICE_NAME, HelloServiceImpl.UNARY_METHOD_NAME, "OK");
+        "UNARY", HelloServiceImpl.SERVICE_NAME, HelloServiceImpl.UNARY_METHOD_NAME, 
+        "OK", "OK"); // TODO: These are the "code" and "grpc_code" labels which are currently duplicated. "code" should be deprecated in a future release.
     assertThat(handled.samples.get(0).value).isWithin(0).of(1);
   }
 
@@ -95,6 +96,7 @@ public class MonitoringServerInterceptorIntegrationTest {
         "CLIENT_STREAMING",
         HelloServiceImpl.SERVICE_NAME,
         HelloServiceImpl.CLIENT_STREAM_METHOD_NAME,
+        "OK", // TODO: These are the "code" and "grpc_code" labels which are currently duplicated. "code" should be deprecated in a future release.
         "OK");
     assertThat(handled.samples.get(0).value).isWithin(0).of(1);
   }
@@ -115,6 +117,7 @@ public class MonitoringServerInterceptorIntegrationTest {
         "SERVER_STREAMING",
         HelloServiceImpl.SERVICE_NAME,
         HelloServiceImpl.SERVER_STREAM_METHOD_NAME,
+        "OK", // TODO: These are the "code" and "grpc_code" labels which are currently duplicated. "code" should be deprecated in a future release.
         "OK");
     assertThat(handled.samples.get(0).value).isWithin(0).of(1);
 
@@ -149,6 +152,7 @@ public class MonitoringServerInterceptorIntegrationTest {
         "BIDI_STREAMING",
         HelloServiceImpl.SERVICE_NAME,
         HelloServiceImpl.BIDI_STREAM_METHOD_NAME,
+        "OK", // TODO: These are the "code" and "grpc_code" labels which are currently duplicated. "code" should be deprecated in a future release.
         "OK");
     assertThat(handled.samples.get(0).value).isWithin(0).of(1);
   }
