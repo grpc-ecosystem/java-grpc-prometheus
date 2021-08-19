@@ -24,14 +24,14 @@ class ServerMetrics {
   private static final Counter.Builder serverStartedBuilder = Counter.build()
       .namespace("grpc")
       .subsystem("server")
-      .name("started_total")
+      .name("started")
       .labelNames("grpc_type", "grpc_service", "grpc_method")
       .help("Total number of RPCs started on the server.");
 
   private static final Counter.Builder serverHandledBuilder = Counter.build()
       .namespace("grpc")
       .subsystem("server")
-      .name("handled_total")
+      .name("handled")
       // TODO: The "code" label should be deprecated in a future major release. (See also below in recordServerHandled().)
       .labelNames("grpc_type", "grpc_service", "grpc_method", "code", "grpc_code")
       .help("Total number of RPCs completed on the server, regardless of success or failure.");
@@ -48,14 +48,14 @@ class ServerMetrics {
   private static final Counter.Builder serverStreamMessagesReceivedBuilder = Counter.build()
       .namespace("grpc")
       .subsystem("server")
-      .name("msg_received_total")
+      .name("msg_received")
       .labelNames("grpc_type", "grpc_service", "grpc_method")
       .help("Total number of stream messages received from the client.");
 
   private static final Counter.Builder serverStreamMessagesSentBuilder = Counter.build()
       .namespace("grpc")
       .subsystem("server")
-      .name("msg_sent_total")
+      .name("msg_sent")
       .labelNames("grpc_type", "grpc_service", "grpc_method")
       .help("Total number of stream messages sent by the server.");
 

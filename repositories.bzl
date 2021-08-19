@@ -4,6 +4,6 @@ MAVEN_ARTIFACTS = [
     "com.google.protobuf:protobuf-java:3.12.1",
     "com.google.protobuf:protobuf-java-util:3.12.1",
     "org.mockito:mockito-all:1.10.19",
-    "io.prometheus:simpleclient:0.9.0",
+    "io.prometheus:simpleclient:0.11.0",
     "com.google.truth:truth:1.0.1",
 ]

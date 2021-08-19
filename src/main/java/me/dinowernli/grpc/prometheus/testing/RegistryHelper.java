@@ -3,7 +3,9 @@
 package me.dinowernli.grpc.prometheus.testing;
 
 import java.util.Enumeration;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import io.prometheus.client.Collector;
 import io.prometheus.client.CollectorRegistry;
@@ -29,6 +31,14 @@ public class RegistryHelper {
       throw new IllegalArgumentException("Could not find metric with name: " + name);
     }
     return result.get();
+  }
+
+  public static List<String> findRecordedMetricNamesOrThrow(String name, CollectorRegistry collectorRegistry) {
+    return findRecordedMetricOrThrow(name, collectorRegistry)
+            .samples
+            .stream()
+            .map(s -> s.name)
+            .collect(Collectors.toList());
   }
 
   public static double extractMetricValue(String name, CollectorRegistry collectorRegistry) {
