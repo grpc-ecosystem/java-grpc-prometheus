@@ -85,7 +85,7 @@ public class MonitoringServerInterceptorIntegrationTest {
     startGrpcServer(CHEAP_METRICS);
     StreamRecorder<HelloResponse> streamRecorder = StreamRecorder.create();
     StreamObserver<HelloRequest> requestStream =
-            createGrpcStub().sayHelloClientStream(streamRecorder);
+        createGrpcStub().sayHelloClientStream(streamRecorder);
     requestStream.onNext(REQUEST);
     requestStream.onNext(REQUEST);
     requestStream.onNext(REQUEST);
@@ -158,7 +158,7 @@ public class MonitoringServerInterceptorIntegrationTest {
     startGrpcServer(CHEAP_METRICS);
     StreamRecorder<HelloResponse> streamRecorder = StreamRecorder.create();
     StreamObserver<HelloRequest> requestStream =
-            createGrpcStub().sayHelloBidiStream(streamRecorder);
+        createGrpcStub().sayHelloBidiStream(streamRecorder);
     requestStream.onNext(REQUEST);
     requestStream.onNext(REQUEST);
     requestStream.onCompleted();
@@ -196,7 +196,7 @@ public class MonitoringServerInterceptorIntegrationTest {
     startGrpcServer(CHEAP_METRICS);
     createGrpcBlockingStub().sayHello(REQUEST);
     assertThat(RegistryHelper.findRecordedMetric(
-            "grpc_server_handled_latency_seconds", collectorRegistry).isPresent()).isFalse();
+        "grpc_server_handled_latency_seconds", collectorRegistry).isPresent()).isFalse();
   }
 
   @Test
@@ -216,8 +216,8 @@ public class MonitoringServerInterceptorIntegrationTest {
 
     long expectedNum = buckets.length + 1;  // Our two buckets and the Inf buckets.
     assertThat(countSamples(
-            "grpc_server_handled_latency_seconds",
-            "grpc_server_handled_latency_seconds_bucket")).isEqualTo(expectedNum);
+        "grpc_server_handled_latency_seconds",
+        "grpc_server_handled_latency_seconds_bucket")).isEqualTo(expectedNum);
   }
 
   @Test
@@ -230,7 +230,7 @@ public class MonitoringServerInterceptorIntegrationTest {
 
     StreamRecorder<HelloResponse> streamRecorder = StreamRecorder.create();
     StreamObserver<HelloRequest> requestStream =
-            createGrpcStub().sayHelloBidiStream(streamRecorder);
+        createGrpcStub().sayHelloBidiStream(streamRecorder);
     requestStream.onNext(REQUEST);
     requestStream.onNext(REQUEST);
     requestStream.onCompleted();

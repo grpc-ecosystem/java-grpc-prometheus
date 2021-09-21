@@ -77,7 +77,7 @@ public class MonitoringClientInterceptorIntegrationTest {
   @Test
   public void clientStreamRpcMetrics() throws Throwable {
     StreamObserver<HelloProto.HelloRequest> requestStream =
-            createClientStub(CHEAP_METRICS).sayHelloClientStream(responseRecorder);
+        createClientStub(CHEAP_METRICS).sayHelloClientStream(responseRecorder);
     requestStream.onNext(REQUEST);
     requestStream.onNext(REQUEST);
 
@@ -155,7 +155,7 @@ public class MonitoringClientInterceptorIntegrationTest {
   @Test
   public void bidiStreamRpcMetrics() throws Throwable {
     StreamObserver<HelloProto.HelloRequest> requestStream =
-            createClientStub(CHEAP_METRICS).sayHelloBidiStream(responseRecorder);
+        createClientStub(CHEAP_METRICS).sayHelloBidiStream(responseRecorder);
     requestStream.onNext(REQUEST);
     requestStream.onNext(REQUEST);
     requestStream.onCompleted();
@@ -196,19 +196,19 @@ public class MonitoringClientInterceptorIntegrationTest {
   @Test
   public void noHistogramIfDisabled() throws Throwable {
     createClientStub(CHEAP_METRICS).sayHello(
-            HelloProto.HelloRequest.getDefaultInstance(), responseRecorder);
+        HelloProto.HelloRequest.getDefaultInstance(), responseRecorder);
     responseRecorder.awaitCompletion();
     assertThat(RegistryHelper.findRecordedMetric(
-            "grpc_client completed_latency_seconds", collectorRegistry).isPresent()).isFalse();
+        "grpc_client completed_latency_seconds", collectorRegistry).isPresent()).isFalse();
   }
 
   @Test
   public void addsHistogramIfEnabled() throws Throwable {
     createClientStub(ALL_METRICS).sayHello(
-            HelloProto.HelloRequest.getDefaultInstance(), responseRecorder);
+        HelloProto.HelloRequest.getDefaultInstance(), responseRecorder);
     responseRecorder.awaitCompletion();
     Collector.MetricFamilySamples latency =
-            findRecordedMetricOrThrow("grpc_client_completed_latency_seconds");
+        findRecordedMetricOrThrow("grpc_client_completed_latency_seconds");
     assertThat(latency.samples.size()).isGreaterThan(0);
   }
 
@@ -216,13 +216,13 @@ public class MonitoringClientInterceptorIntegrationTest {
   public void overridesHistogramBuckets() throws Throwable {
     double[] buckets = new double[] {0.1, 0.2};
     createClientStub(ALL_METRICS.withLatencyBuckets(buckets)).sayHello(
-            HelloProto.HelloRequest.getDefaultInstance(), responseRecorder);
+        HelloProto.HelloRequest.getDefaultInstance(), responseRecorder);
     responseRecorder.awaitCompletion();
 
     long expectedNum = buckets.length + 1;  // Our two buckets and the Inf buckets.
     assertThat(countSamples(
-            "grpc_client_completed_latency_seconds",
-            "grpc_client_completed_latency_seconds_bucket")).isEqualTo(expectedNum);
+        "grpc_client_completed_latency_seconds",
+        "grpc_client_completed_latency_seconds_bucket")).isEqualTo(expectedNum);
   }
 
 
