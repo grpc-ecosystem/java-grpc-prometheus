@@ -21,7 +21,7 @@ class ClientMetrics {
   private static final Counter.Builder rpcStartedBuilder = Counter.build()
       .namespace("grpc")
       .subsystem("client")
-      .name("started_total")
+      .name("started")
       .labelNames("grpc_type", "grpc_service", "grpc_method")
       .help("Total number of RPCs started on the client.");
 
@@ -44,14 +44,14 @@ class ClientMetrics {
   private static final Counter.Builder streamMessagesReceivedBuilder = Counter.build()
       .namespace("grpc")
       .subsystem("client")
-      .name("msg_received_total")
+      .name("msg_received")
       .labelNames("grpc_type", "grpc_service", "grpc_method")
       .help("Total number of stream messages received from the server.");
 
   private static final Counter.Builder streamMessagesSentBuilder = Counter.build()
       .namespace("grpc")
       .subsystem("client")
-      .name("msg_sent_total")
+      .name("msg_sent")
       .labelNames("grpc_type", "grpc_service", "grpc_method")
       .help("Total number of stream messages sent by the client.");
 
