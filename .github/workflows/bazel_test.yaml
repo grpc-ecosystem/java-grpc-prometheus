@@ -1,0 +1,17 @@
+---
+name: Bazel Test
+
+on: [push]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install Bazel
+        uses: ./.github/actions/install
+
+      - name: Run tests
+        run: bazel test //src/...
