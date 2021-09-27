@@ -22,19 +22,22 @@ class MonitoringServerCall<R,S> extends ForwardingServerCall.SimpleForwardingSer
   private final ServerMetrics serverMetrics;
   private final Configuration configuration;
   private final Instant startInstant;
+  private final Metadata requestHeaders;
 
   MonitoringServerCall(
       ServerCall<R,S> delegate,
       Clock clock,
       GrpcMethod grpcMethod,
       ServerMetrics serverMetrics,
-      Configuration configuration) {
+      Configuration configuration,
+      Metadata requestHeaders) {
     super(delegate);
     this.clock = clock;
     this.grpcMethod = grpcMethod;
     this.serverMetrics = serverMetrics;
     this.configuration = configuration;
     this.startInstant = clock.instant();
+    this.requestHeaders = requestHeaders;
 
     // TODO(dino): Consider doing this in the onReady() method of the listener instead.
     reportStartMetrics();
@@ -49,21 +52,21 @@ class MonitoringServerCall<R,S> extends ForwardingServerCall.SimpleForwardingSer
   @Override
   public void sendMessage(S message) {
     if (grpcMethod.streamsResponses()) {
-      serverMetrics.recordStreamMessageSent();
+      serverMetrics.recordStreamMessageSent(requestHeaders);
     }
     super.sendMessage(message);
   }
 
   private void reportStartMetrics() {
-    serverMetrics.recordCallStarted();
+    serverMetrics.recordCallStarted(requestHeaders);
   }
 
   private void reportEndMetrics(Status status) {
-    serverMetrics.recordServerHandled(status.getCode());
+    serverMetrics.recordServerHandled(status.getCode(), requestHeaders);
     if (configuration.isIncludeLatencyHistograms()) {
       double latencySec =
           (clock.millis() - startInstant.toEpochMilli()) / (double) MILLIS_PER_SECOND;
-      serverMetrics.recordLatency(latencySec);
+      serverMetrics.recordLatency(latencySec, requestHeaders);
     }
   }
 }

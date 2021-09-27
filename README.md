@@ -25,6 +25,7 @@ Note that by passing a `Configuration` instance to the interceptors, it is possi
 * Whether or not a latency histogram is recorded for RPCs.
 * Which histogram buckets to use for the latency metrics.
 * Which Prometheus `CollectorRegistry` the metrics get registered with.
+* (Optional) Which headers you want to be applied to metrics as added labels.
 
 The server interceptors have an identical implementation in Golang, [go-grpc-prometheus](https://github.com/mwitkow/go-grpc-prometheus), brought to you by [@MWitkow](http://twitter.com/mwitkow).
 
@@ -57,6 +58,24 @@ grpcStub = HelloServiceGrpc.newStub(NettyChannelBuilder.forAddress(REMOTE_HOST, 
     .intercept(monitoringInterceptor)
     .build());
 ```
+
+If you want to instruct the interceptor to use a specific header of interest, for example "header-1" as a label on all
+produced metrics, you can do the following, which will cause the metrics to carry an extra label "header_1" whose
+value is filled from the header value on each request: 
+
+```java
+MonitoringServerInterceptor monitoringInterceptor = 
+    MonitoringServerInterceptor.create(
+        Configuration
+            .cheapMetricsOnly()
+            .withLabelHeaders(Arrays.asList("header-1"))
+    );
+grpcServer = ServerBuilder.forPort(GRPC_PORT)
+    .addService(ServerInterceptors.intercept(
+        HelloServiceGrpc.bindService(new HelloServiceImpl()), monitoringInterceptor))
+    .build();
+```
+
 
 If you're using Spring Boot 2 with micrometer-registry-prometheus you should inject the CollectorRegistry that is already provided in the application context:
 

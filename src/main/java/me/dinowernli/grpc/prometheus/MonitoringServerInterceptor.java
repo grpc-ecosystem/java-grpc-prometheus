@@ -36,9 +36,10 @@ public class MonitoringServerInterceptor implements ServerInterceptor {
     MethodDescriptor<R, S> methodDescriptor = call.getMethodDescriptor();
     GrpcMethod grpcMethod = GrpcMethod.of(methodDescriptor);
     ServerMetrics metrics = serverMetricsFactory.createMetricsForMethod(grpcMethod);
-    ServerCall<R,S> monitoringCall = new MonitoringServerCall(call, clock, grpcMethod, metrics, configuration);
+    ServerCall<R,S> monitoringCall =
+            new MonitoringServerCall(call, clock, grpcMethod, metrics, configuration, requestHeaders);
     return new MonitoringServerCallListener<>(
-        next.startCall(monitoringCall, requestHeaders), metrics, grpcMethod);
+        next.startCall(monitoringCall, requestHeaders), metrics, grpcMethod, requestHeaders);
   }
 
 }

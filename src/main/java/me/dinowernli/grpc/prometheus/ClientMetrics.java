@@ -2,27 +2,37 @@
 
 package me.dinowernli.grpc.prometheus;
 
+import static me.dinowernli.grpc.prometheus.Common.addLabels;
+import static me.dinowernli.grpc.prometheus.Common.asArray;
+import static me.dinowernli.grpc.prometheus.Common.customLabels;
+import static me.dinowernli.grpc.prometheus.Common.metadataKeys;
+
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import io.grpc.MethodDescriptor;
+import io.grpc.Metadata;
+import io.grpc.Metadata.Key;
 import io.grpc.Status.Code;
 import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.Counter;
 import io.prometheus.client.Histogram;
-import io.prometheus.client.SimpleCollector;
 
 /**
  * Prometheus metric definitions used for client-side monitoring of grpc services.
  */
 class ClientMetrics {
+  private static final List<String> defaultRequestLabels =
+          Arrays.asList("grpc_type", "grpc_service", "grpc_method");
+
+  private static final List<String> defaultResponseLabels =
+          Arrays.asList("grpc_type", "grpc_service", "grpc_method", "code", "grpc_code");
+
   private static final Counter.Builder rpcStartedBuilder = Counter.build()
       .namespace("grpc")
       .subsystem("client")
       .name("started")
-      .labelNames("grpc_type", "grpc_service", "grpc_method")
       .help("Total number of RPCs started on the client.");
 
   private static final Counter.Builder rpcCompletedBuilder = Counter.build()
@@ -30,7 +40,6 @@ class ClientMetrics {
       .subsystem("client")
       .name("completed")
       // TODO: The "code" label should be deprecated in a future major release. (See also below in recordClientHandled().)
-      .labelNames("grpc_type", "grpc_service", "grpc_method", "code", "grpc_code")
       .help("Total number of RPCs completed on the client, regardless of success or failure.");
 
   private static final Histogram.Builder completedLatencySecondsBuilder =
@@ -38,23 +47,21 @@ class ClientMetrics {
           .namespace("grpc")
           .subsystem("client")
           .name("completed_latency_seconds")
-          .labelNames("grpc_type", "grpc_service", "grpc_method")
           .help("Histogram of rpc response latency (in seconds) for completed rpcs.");
 
   private static final Counter.Builder streamMessagesReceivedBuilder = Counter.build()
       .namespace("grpc")
       .subsystem("client")
       .name("msg_received")
-      .labelNames("grpc_type", "grpc_service", "grpc_method")
       .help("Total number of stream messages received from the server.");
 
   private static final Counter.Builder streamMessagesSentBuilder = Counter.build()
       .namespace("grpc")
       .subsystem("client")
       .name("msg_sent")
-      .labelNames("grpc_type", "grpc_service", "grpc_method")
       .help("Total number of stream messages sent by the client.");
 
+  private final List<Key<String>> labelHeaderKeys;
   private final Counter rpcStarted;
   private final Counter rpcCompleted;
   private final Counter streamMessagesReceived;
@@ -64,12 +71,14 @@ class ClientMetrics {
   private final GrpcMethod method;
 
   private ClientMetrics(
+      List<Key<String>> labelHeaderKeys,
       GrpcMethod method,
       Counter rpcStarted,
       Counter rpcCompleted,
       Counter streamMessagesReceived,
       Counter streamMessagesSent,
       Optional<Histogram> completedLatencySeconds) {
+    this.labelHeaderKeys = labelHeaderKeys;
     this.method = method;
     this.rpcStarted = rpcStarted;
     this.rpcCompleted = rpcCompleted;
@@ -78,38 +87,43 @@ class ClientMetrics {
     this.completedLatencySeconds = completedLatencySeconds;
   }
 
-  public void recordCallStarted() {
-    addLabels(rpcStarted).inc();
+  public void recordCallStarted(Metadata metadata) {
+    addLabels(rpcStarted, customLabels(metadata, labelHeaderKeys), method).inc();
   }
 
-  public void recordClientHandled(Code code) {
+  public void recordClientHandled(Code code, Metadata metadata) {
     // TODO: The "code" label should be deprecated in a future major release.
-    addLabels(rpcCompleted, code.toString(), code.toString()).inc();
+    List<String> allLabels = new ArrayList<>();
+    allLabels.add(code.toString());
+    allLabels.add(code.toString());
+    allLabels.addAll(customLabels(metadata, labelHeaderKeys));
+    addLabels(rpcCompleted, allLabels, method).inc();
   }
 
-  public void recordStreamMessageSent() {
-    addLabels(streamMessagesSent).inc();
+  public void recordStreamMessageSent(Metadata metadata) {
+    addLabels(streamMessagesSent, customLabels(metadata, labelHeaderKeys), method).inc();
   }
 
-  public void recordStreamMessageReceived() {
-    addLabels(streamMessagesReceived).inc();
+  public void recordStreamMessageReceived(Metadata metadata) {
+    addLabels(streamMessagesReceived, customLabels(metadata, labelHeaderKeys), method).inc();
   }
 
   /**
    * Only has any effect if monitoring is configured to include latency histograms. Otherwise, this
    * does nothing.
    */
-  public void recordLatency(double latencySec) {
+  public void recordLatency(double latencySec, Metadata metadata) {
     if (!completedLatencySeconds.isPresent()) {
       return;
     }
-    addLabels(completedLatencySeconds.get()).observe(latencySec);
+    addLabels(completedLatencySeconds.get(), customLabels(metadata, labelHeaderKeys), method).observe(latencySec);
   }
 
   /**
    * Knows how to produce {@link ClientMetrics} instances for individual methods.
    */
   static class Factory {
+    private final List<Key<String>> labelHeaderKeys;
     private final Counter rpcStarted;
     private final Counter rpcCompleted;
     private final Counter streamMessagesReceived;
@@ -118,14 +132,24 @@ class ClientMetrics {
 
     Factory(Configuration configuration) {
       CollectorRegistry registry = configuration.getCollectorRegistry();
-      this.rpcStarted = rpcStartedBuilder.register(registry);
-      this.rpcCompleted = rpcCompletedBuilder.register(registry);
-      this.streamMessagesReceived = streamMessagesReceivedBuilder.register(registry);
-      this.streamMessagesSent = streamMessagesSentBuilder.register(registry);
+      this.labelHeaderKeys = metadataKeys(configuration.getLabelHeaders());
+      this.rpcStarted = rpcStartedBuilder
+              .labelNames(asArray(defaultRequestLabels, configuration.getSanitizedLabelHeaders()))
+              .register(registry);
+      this.rpcCompleted = rpcCompletedBuilder
+              .labelNames(asArray(defaultResponseLabels, configuration.getSanitizedLabelHeaders()))
+              .register(registry);
+      this.streamMessagesReceived = streamMessagesReceivedBuilder
+              .labelNames(asArray(defaultRequestLabels, configuration.getSanitizedLabelHeaders()))
+              .register(registry);
+      this.streamMessagesSent = streamMessagesSentBuilder
+              .labelNames(asArray(defaultRequestLabels, configuration.getSanitizedLabelHeaders()))
+              .register(registry);
 
       if (configuration.isIncludeLatencyHistograms()) {
         this.completedLatencySeconds = Optional.of(ClientMetrics.completedLatencySecondsBuilder
             .buckets(configuration.getLatencyBuckets())
+            .labelNames(asArray(defaultRequestLabels, configuration.getSanitizedLabelHeaders()))
             .register(registry));
       } else {
         this.completedLatencySeconds = Optional.empty();
@@ -135,6 +159,7 @@ class ClientMetrics {
     /** Creates a {@link ClientMetrics} for the supplied gRPC method. */
     ClientMetrics createMetricsForMethod(GrpcMethod grpcMethod) {
       return new ClientMetrics(
+          labelHeaderKeys,
           grpcMethod,
           rpcStarted,
           rpcCompleted,
@@ -142,12 +167,5 @@ class ClientMetrics {
           streamMessagesSent,
           completedLatencySeconds);
     }
-  }
-
-  private <T> T addLabels(SimpleCollector<T> collector, String... labels) {
-    List<String> allLabels = new ArrayList<>();
-    Collections.addAll(allLabels, method.type(), method.serviceName(), method.methodName());
-    Collections.addAll(allLabels, labels);
-    return collector.labels(allLabels.toArray(new String[0]));
   }
 }
