@@ -78,8 +78,8 @@ public class MonitoringServerInterceptorIntegrationTest {
     assertThat(handled.samples).hasSize(2);
     MetricFamilySamples.Sample totalSample = getSample(handled, "grpc_server_handled_total");
     assertThat(totalSample.labelValues).containsExactly(
-        "UNARY", HelloServiceImpl.SERVICE_NAME, HelloServiceImpl.UNARY_METHOD_NAME,
-        "OK", "OK"); // TODO: These are the "code" and "grpc_code" labels which are currently duplicated. "code" should be deprecated in a future release.
+            "UNARY", HelloServiceImpl.SERVICE_NAME, HelloServiceImpl.UNARY_METHOD_NAME,
+            "OK", "OK"); // TODO: These are the "code" and "grpc_code" labels which are currently duplicated. "code" should be deprecated in a future release.
     assertThat(totalSample.value).isWithin(0).of(1);
   }
 
@@ -110,11 +110,11 @@ public class MonitoringServerInterceptorIntegrationTest {
     assertThat(handled.samples).hasSize(2);
     MetricFamilySamples.Sample totalSample = getSample(handled, "grpc_server_handled_total");
     assertThat(totalSample.labelValues).containsExactly(
-        "CLIENT_STREAMING",
-        HelloServiceImpl.SERVICE_NAME,
-        HelloServiceImpl.CLIENT_STREAM_METHOD_NAME,
-        "OK", // TODO: These are the "code" and "grpc_code" labels which are currently duplicated. "code" should be deprecated in a future release.
-        "OK");
+            "CLIENT_STREAMING",
+            HelloServiceImpl.SERVICE_NAME,
+            HelloServiceImpl.CLIENT_STREAM_METHOD_NAME,
+            "OK", // TODO: These are the "code" and "grpc_code" labels which are currently duplicated. "code" should be deprecated in a future release.
+            "OK");
     assertThat(totalSample.value).isWithin(0).of(1);
   }
 
@@ -122,7 +122,7 @@ public class MonitoringServerInterceptorIntegrationTest {
   public void serverStreamRpcMetrics() throws Throwable {
     startGrpcServer(CHEAP_METRICS);
     ImmutableList<HelloResponse> responses =
-        ImmutableList.copyOf(createGrpcBlockingStub().sayHelloServerStream(REQUEST));
+            ImmutableList.copyOf(createGrpcBlockingStub().sayHelloServerStream(REQUEST));
 
     assertThat(findRecordedMetricOrThrow("grpc_server_started").samples).hasSize(2);
     assertThat(findRecordedMetricNamesOrThrow("grpc_server_started")).contains("grpc_server_started_total");
@@ -138,19 +138,19 @@ public class MonitoringServerInterceptorIntegrationTest {
     assertThat(handled.samples).hasSize(2);
     MetricFamilySamples.Sample totalSample = getSample(handled, "grpc_server_handled_total");
     assertThat(totalSample.labelValues).containsExactly(
-        "SERVER_STREAMING",
-        HelloServiceImpl.SERVICE_NAME,
-        HelloServiceImpl.SERVER_STREAM_METHOD_NAME,
-        "OK", // TODO: These are the "code" and "grpc_code" labels which are currently duplicated. "code" should be deprecated in a future release.
-        "OK");
+            "SERVER_STREAMING",
+            HelloServiceImpl.SERVICE_NAME,
+            HelloServiceImpl.SERVER_STREAM_METHOD_NAME,
+            "OK", // TODO: These are the "code" and "grpc_code" labels which are currently duplicated. "code" should be deprecated in a future release.
+            "OK");
     assertThat(totalSample.value).isWithin(0).of(1);
 
     MetricFamilySamples messagesSent = findRecordedMetricOrThrow("grpc_server_msg_sent");
     totalSample = getSample(messagesSent, "grpc_server_msg_sent_total");
     assertThat(totalSample.labelValues).containsExactly(
-        "SERVER_STREAMING",
-        HelloServiceImpl.SERVICE_NAME,
-        HelloServiceImpl.SERVER_STREAM_METHOD_NAME);
+            "SERVER_STREAMING",
+            HelloServiceImpl.SERVICE_NAME,
+            HelloServiceImpl.SERVER_STREAM_METHOD_NAME);
     assertThat(totalSample.value).isWithin(0).of(responses.size());
   }
 
@@ -183,11 +183,11 @@ public class MonitoringServerInterceptorIntegrationTest {
     assertThat(handled.samples).hasSize(2);
     MetricFamilySamples.Sample totalSample = getSample(handled, "grpc_server_handled_total");
     assertThat(totalSample.labelValues).containsExactly(
-        "BIDI_STREAMING",
-        HelloServiceImpl.SERVICE_NAME,
-        HelloServiceImpl.BIDI_STREAM_METHOD_NAME,
-        "OK", // TODO: These are the "code" and "grpc_code" labels which are currently duplicated. "code" should be deprecated in a future release.
-        "OK");
+            "BIDI_STREAMING",
+            HelloServiceImpl.SERVICE_NAME,
+            HelloServiceImpl.BIDI_STREAM_METHOD_NAME,
+            "OK", // TODO: These are the "code" and "grpc_code" labels which are currently duplicated. "code" should be deprecated in a future release.
+            "OK");
     assertThat(totalSample.value).isWithin(0).of(1);
   }
 
