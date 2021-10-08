@@ -349,7 +349,7 @@ public class MonitoringServerInterceptorIntegrationTest {
         .build();
   }
 
-  private Sample getSample(MetricFamilySamples family, String sampleName) {
+  private static Sample getSample(MetricFamilySamples family, String sampleName) {
     return family.samples.stream().filter(s -> s.name.equals(sampleName)).findFirst().get();
   }
 }

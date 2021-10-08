@@ -14,14 +14,14 @@ class MonitoringServerCallListener<R> extends ForwardingServerCallListener<R> {
   private final ServerCall.Listener<R> delegate;
   private final GrpcMethod grpcMethod;
   private final ServerMetrics serverMetrics;
-  private final Metadata requestHeaders;
+  private final Metadata requestMetadata;
 
   MonitoringServerCallListener(
-      ServerCall.Listener<R> delegate, ServerMetrics serverMetrics, GrpcMethod grpcMethod, Metadata requestHeaders) {
+      ServerCall.Listener<R> delegate, ServerMetrics serverMetrics, GrpcMethod grpcMethod, Metadata requestMetadata) {
     this.delegate = delegate;
     this.serverMetrics = serverMetrics;
     this.grpcMethod = grpcMethod;
-    this.requestHeaders = requestHeaders;
+    this.requestMetadata = requestMetadata;
   }
 
   @Override
@@ -32,7 +32,7 @@ class MonitoringServerCallListener<R> extends ForwardingServerCallListener<R> {
   @Override
   public void onMessage(R request) {
     if (grpcMethod.streamsRequests()) {
-      serverMetrics.recordStreamMessageReceived(requestHeaders);
+      serverMetrics.recordStreamMessageReceived(requestMetadata);
     }
     super.onMessage(request);
   }

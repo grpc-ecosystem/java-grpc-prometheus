@@ -2,10 +2,10 @@
 
 package me.dinowernli.grpc.prometheus;
 
-import static me.dinowernli.grpc.prometheus.Common.addLabels;
-import static me.dinowernli.grpc.prometheus.Common.asArray;
-import static me.dinowernli.grpc.prometheus.Common.customLabels;
-import static me.dinowernli.grpc.prometheus.Common.metadataKeys;
+import static me.dinowernli.grpc.prometheus.Labels.addLabels;
+import static me.dinowernli.grpc.prometheus.Labels.asArray;
+import static me.dinowernli.grpc.prometheus.Labels.customLabels;
+import static me.dinowernli.grpc.prometheus.Labels.metadataKeys;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -24,10 +24,10 @@ import io.prometheus.client.Histogram;
  */
 class ClientMetrics {
   private static final List<String> defaultRequestLabels =
-          Arrays.asList("grpc_type", "grpc_service", "grpc_method");
+      Arrays.asList("grpc_type", "grpc_service", "grpc_method");
 
   private static final List<String> defaultResponseLabels =
-          Arrays.asList("grpc_type", "grpc_service", "grpc_method", "code", "grpc_code");
+      Arrays.asList("grpc_type", "grpc_service", "grpc_method", "code", "grpc_code");
 
   private static final Counter.Builder rpcStartedBuilder = Counter.build()
       .namespace("grpc")
@@ -134,17 +134,17 @@ class ClientMetrics {
       CollectorRegistry registry = configuration.getCollectorRegistry();
       this.labelHeaderKeys = metadataKeys(configuration.getLabelHeaders());
       this.rpcStarted = rpcStartedBuilder
-              .labelNames(asArray(defaultRequestLabels, configuration.getSanitizedLabelHeaders()))
-              .register(registry);
+          .labelNames(asArray(defaultRequestLabels, configuration.getSanitizedLabelHeaders()))
+          .register(registry);
       this.rpcCompleted = rpcCompletedBuilder
-              .labelNames(asArray(defaultResponseLabels, configuration.getSanitizedLabelHeaders()))
-              .register(registry);
+          .labelNames(asArray(defaultResponseLabels, configuration.getSanitizedLabelHeaders()))
+          .register(registry);
       this.streamMessagesReceived = streamMessagesReceivedBuilder
-              .labelNames(asArray(defaultRequestLabels, configuration.getSanitizedLabelHeaders()))
-              .register(registry);
+          .labelNames(asArray(defaultRequestLabels, configuration.getSanitizedLabelHeaders()))
+          .register(registry);
       this.streamMessagesSent = streamMessagesSentBuilder
-              .labelNames(asArray(defaultRequestLabels, configuration.getSanitizedLabelHeaders()))
-              .register(registry);
+          .labelNames(asArray(defaultRequestLabels, configuration.getSanitizedLabelHeaders()))
+          .register(registry);
 
       if (configuration.isIncludeLatencyHistograms()) {
         this.completedLatencySeconds = Optional.of(ClientMetrics.completedLatencySecondsBuilder
@@ -156,7 +156,9 @@ class ClientMetrics {
       }
     }
 
-    /** Creates a {@link ClientMetrics} for the supplied gRPC method. */
+    /**
+     * Creates a {@link ClientMetrics} for the supplied gRPC method.
+     */
     ClientMetrics createMetricsForMethod(GrpcMethod grpcMethod) {
       return new ClientMetrics(
           labelHeaderKeys,

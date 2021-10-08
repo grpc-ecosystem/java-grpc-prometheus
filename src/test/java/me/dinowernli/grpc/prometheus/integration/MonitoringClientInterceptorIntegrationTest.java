@@ -306,7 +306,7 @@ public class MonitoringClientInterceptorIntegrationTest {
     return RegistryHelper.countSamples(metricName, sampleName, collectorRegistry);
   }
 
-  private Collector.MetricFamilySamples.Sample getSample(Collector.MetricFamilySamples family, String sampleName) {
+  private static Collector.MetricFamilySamples.Sample getSample(Collector.MetricFamilySamples family, String sampleName) {
     return family.samples.stream().filter(s -> s.name.equals(sampleName)).findFirst().get();
   }
 }

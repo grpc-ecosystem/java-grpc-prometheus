@@ -22,7 +22,7 @@ class MonitoringServerCall<R,S> extends ForwardingServerCall.SimpleForwardingSer
   private final ServerMetrics serverMetrics;
   private final Configuration configuration;
   private final Instant startInstant;
-  private final Metadata requestHeaders;
+  private final Metadata requestMetadata;
 
   MonitoringServerCall(
       ServerCall<R,S> delegate,
@@ -30,14 +30,14 @@ class MonitoringServerCall<R,S> extends ForwardingServerCall.SimpleForwardingSer
       GrpcMethod grpcMethod,
       ServerMetrics serverMetrics,
       Configuration configuration,
-      Metadata requestHeaders) {
+      Metadata requestMetadata) {
     super(delegate);
     this.clock = clock;
     this.grpcMethod = grpcMethod;
     this.serverMetrics = serverMetrics;
     this.configuration = configuration;
     this.startInstant = clock.instant();
-    this.requestHeaders = requestHeaders;
+    this.requestMetadata = requestMetadata;
 
     // TODO(dino): Consider doing this in the onReady() method of the listener instead.
     reportStartMetrics();
@@ -52,21 +52,21 @@ class MonitoringServerCall<R,S> extends ForwardingServerCall.SimpleForwardingSer
   @Override
   public void sendMessage(S message) {
     if (grpcMethod.streamsResponses()) {
-      serverMetrics.recordStreamMessageSent(requestHeaders);
+      serverMetrics.recordStreamMessageSent(requestMetadata);
     }
     super.sendMessage(message);
   }
 
   private void reportStartMetrics() {
-    serverMetrics.recordCallStarted(requestHeaders);
+    serverMetrics.recordCallStarted(requestMetadata);
   }
 
   private void reportEndMetrics(Status status) {
-    serverMetrics.recordServerHandled(status.getCode(), requestHeaders);
+    serverMetrics.recordServerHandled(status.getCode(), requestMetadata);
     if (configuration.isIncludeLatencyHistograms()) {
       double latencySec =
           (clock.millis() - startInstant.toEpochMilli()) / (double) MILLIS_PER_SECOND;
-      serverMetrics.recordLatency(latencySec, requestHeaders);
+      serverMetrics.recordLatency(latencySec, requestMetadata);
     }
   }
 }

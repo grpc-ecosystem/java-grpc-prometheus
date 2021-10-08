@@ -2,10 +2,10 @@
 
 package me.dinowernli.grpc.prometheus;
 
-import static me.dinowernli.grpc.prometheus.Common.addLabels;
-import static me.dinowernli.grpc.prometheus.Common.asArray;
-import static me.dinowernli.grpc.prometheus.Common.customLabels;
-import static me.dinowernli.grpc.prometheus.Common.metadataKeys;
+import static me.dinowernli.grpc.prometheus.Labels.addLabels;
+import static me.dinowernli.grpc.prometheus.Labels.asArray;
+import static me.dinowernli.grpc.prometheus.Labels.customLabels;
+import static me.dinowernli.grpc.prometheus.Labels.metadataKeys;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -21,16 +21,16 @@ import io.prometheus.client.Histogram;
 
 /**
  * Prometheus metric definitions used for server-side monitoring of grpc services.
- *
+ * <p>
  * Instances of this class hold the counters we increment for a specific pair of grpc service
  * definition and collection registry.
  */
 class ServerMetrics {
   private static final List<String> defaultRequestLabels =
-          Arrays.asList("grpc_type", "grpc_service", "grpc_method");
+      Arrays.asList("grpc_type", "grpc_service", "grpc_method");
 
   private static final List<String> defaultResponseLabels =
-          Arrays.asList("grpc_type", "grpc_service", "grpc_method", "code", "grpc_code");
+      Arrays.asList("grpc_type", "grpc_service", "grpc_method", "code", "grpc_code");
 
   private static final Counter.Builder serverStartedBuilder = Counter.build()
       .namespace("grpc")
@@ -121,7 +121,7 @@ class ServerMetrics {
       return;
     }
     addLabels(this.serverHandledLatencySeconds.get(), customLabels(metadata, labelHeaderKeys), method)
-            .observe(latencySec);
+        .observe(latencySec);
   }
 
   /**
@@ -139,17 +139,17 @@ class ServerMetrics {
       CollectorRegistry registry = configuration.getCollectorRegistry();
       this.labelHeaderKeys = metadataKeys(configuration.getLabelHeaders());
       this.serverStarted = serverStartedBuilder
-              .labelNames(asArray(defaultRequestLabels, configuration.getSanitizedLabelHeaders()))
-              .register(registry);
+          .labelNames(asArray(defaultRequestLabels, configuration.getSanitizedLabelHeaders()))
+          .register(registry);
       this.serverHandled = serverHandledBuilder
-              .labelNames(asArray(defaultResponseLabels, configuration.getSanitizedLabelHeaders()))
-              .register(registry);
+          .labelNames(asArray(defaultResponseLabels, configuration.getSanitizedLabelHeaders()))
+          .register(registry);
       this.serverStreamMessagesReceived = serverStreamMessagesReceivedBuilder
-              .labelNames(asArray(defaultRequestLabels, configuration.getSanitizedLabelHeaders()))
-              .register(registry);
+          .labelNames(asArray(defaultRequestLabels, configuration.getSanitizedLabelHeaders()))
+          .register(registry);
       this.serverStreamMessagesSent = serverStreamMessagesSentBuilder
-              .labelNames(asArray(defaultRequestLabels, configuration.getSanitizedLabelHeaders()))
-              .register(registry);
+          .labelNames(asArray(defaultRequestLabels, configuration.getSanitizedLabelHeaders()))
+          .register(registry);
 
       if (configuration.isIncludeLatencyHistograms()) {
         this.serverHandledLatencySeconds = Optional.of(serverHandledLatencySecondsBuilder
@@ -161,7 +161,9 @@ class ServerMetrics {
       }
     }
 
-    /** Creates a {@link ServerMetrics} for the supplied gRPC method. */
+    /**
+     * Creates a {@link ServerMetrics} for the supplied gRPC method.
+     */
     ServerMetrics createMetricsForMethod(GrpcMethod grpcMethod) {
       return new ServerMetrics(
           labelHeaderKeys,
