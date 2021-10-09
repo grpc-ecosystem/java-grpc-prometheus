@@ -16,6 +16,7 @@ class MonitoringClientCall<R, S> extends ForwardingClientCall.SimpleForwardingCl
   private final GrpcMethod grpcMethod;
   private final Configuration configuration;
   private final Clock clock;
+  private Metadata requestMetadata;
 
   MonitoringClientCall(
       ClientCall<R, S> delegate,
@@ -31,16 +32,17 @@ class MonitoringClientCall<R, S> extends ForwardingClientCall.SimpleForwardingCl
   }
 
   @Override
-  public void start(ClientCall.Listener<S> delegate, Metadata metadata) {
-    clientMetrics.recordCallStarted();
+  public void start(Listener<S> delegate, Metadata metadata) {
+    this.requestMetadata = metadata;
+    clientMetrics.recordCallStarted(metadata);
     super.start(new MonitoringClientCallListener<>(
-        delegate, clientMetrics, grpcMethod, configuration, clock), metadata);
+        delegate, clientMetrics, grpcMethod, configuration, clock, metadata), metadata);
   }
 
   @Override
   public void sendMessage(R requestMessage) {
     if (grpcMethod.streamsRequests()) {
-      clientMetrics.recordStreamMessageSent();
+      clientMetrics.recordStreamMessageSent(requestMetadata == null ? new Metadata() : requestMetadata);
     }
     super.sendMessage(requestMessage);
   }

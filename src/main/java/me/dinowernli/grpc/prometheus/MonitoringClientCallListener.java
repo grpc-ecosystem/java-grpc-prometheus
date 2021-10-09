@@ -19,19 +19,22 @@ class MonitoringClientCallListener<S> extends ForwardingClientCallListener<S> {
   private final Configuration configuration;
   private final Clock clock;
   private final Instant startInstant;
+  private final Metadata requestMetadata;
 
   MonitoringClientCallListener(
       ClientCall.Listener<S> delegate,
       ClientMetrics clientMetrics,
       GrpcMethod grpcMethod,
       Configuration configuration,
-      Clock clock) {
+      Clock clock,
+      Metadata requestMetadata) {
     this.delegate = delegate;
     this.clientMetrics = clientMetrics;
     this.grpcMethod = grpcMethod;
     this.configuration = configuration;
     this.clock = clock;
     this.startInstant = clock.instant();
+    this.requestMetadata = requestMetadata;
   }
 
   @Override
@@ -41,11 +44,11 @@ class MonitoringClientCallListener<S> extends ForwardingClientCallListener<S> {
 
   @Override
   public void onClose(Status status, Metadata metadata) {
-    clientMetrics.recordClientHandled(status.getCode());
+    clientMetrics.recordClientHandled(status.getCode(), requestMetadata);
     if (configuration.isIncludeLatencyHistograms()) {
       double latencySec =
           (clock.millis() - startInstant.toEpochMilli()) / (double) MILLIS_PER_SECOND;
-      clientMetrics.recordLatency(latencySec);
+      clientMetrics.recordLatency(latencySec, requestMetadata);
     }
     super.onClose(status, metadata);
   }
@@ -53,7 +56,7 @@ class MonitoringClientCallListener<S> extends ForwardingClientCallListener<S> {
   @Override
   public void onMessage(S responseMessage) {
     if (grpcMethod.streamsResponses()) {
-      clientMetrics.recordStreamMessageReceived();
+      clientMetrics.recordStreamMessageReceived(requestMetadata);
     }
     super.onMessage(responseMessage);
   }
