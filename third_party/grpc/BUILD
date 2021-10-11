@@ -7,7 +7,6 @@ java_library(
     licenses = ["permissive"],
     exports = [
         "@io_grpc_grpc_java//api",
-        "@io_grpc_grpc_java//core",
         "@io_grpc_grpc_java//stub",
     ],
 )
