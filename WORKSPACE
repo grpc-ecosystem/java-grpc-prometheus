@@ -21,6 +21,9 @@ http_archive(
     urls = ["https://github.com/bazelbuild/rules_jvm_external/archive/4.1.zip"],
 )
 
+load("@rules_jvm_external//:repositories.bzl", "rules_jvm_external_deps")
+rules_jvm_external_deps()
+
 load("@rules_jvm_external//:defs.bzl", "maven_install")
 load("//:repositories.bzl", "MAVEN_ARTIFACTS")
 
