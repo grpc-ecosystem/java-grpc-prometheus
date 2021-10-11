@@ -10,15 +10,15 @@ http_archive(
 load("@io_grpc_grpc_java//:repositories.bzl", "IO_GRPC_GRPC_JAVA_ARTIFACTS")
 load("@io_grpc_grpc_java//:repositories.bzl", "IO_GRPC_GRPC_JAVA_OVERRIDE_TARGETS")
 
-RULES_JVM_EXTERNAL_TAG = "3.0"
+RULES_JVM_EXTERNAL_TAG = "4.0"
 
 RULES_JVM_EXTERNAL_SHA = "62133c125bf4109dfd9d2af64830208356ce4ef8b165a6ef15bbff7460b35c3a"
 
 http_archive(
     name = "rules_jvm_external",
-    sha256 = RULES_JVM_EXTERNAL_SHA,
-    strip_prefix = "rules_jvm_external-%s" % RULES_JVM_EXTERNAL_TAG,
-    url = "https://github.com/bazelbuild/rules_jvm_external/archive/%s.zip" % RULES_JVM_EXTERNAL_TAG,
+    sha256 = "f36441aa876c4f6427bfb2d1f2d723b48e9d930b62662bf723ddfb8fc80f0140",
+    strip_prefix = "rules_jvm_external-4.1",
+    urls = ["https://github.com/bazelbuild/rules_jvm_external/archive/4.1.zip"],
 )
 
 load("@rules_jvm_external//:defs.bzl", "maven_install")
