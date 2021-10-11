@@ -8,4 +8,6 @@ MAVEN_ARTIFACTS = [
     "com.google.truth:truth:1.0.1",
     "com.google.cloud:google-cloud-core:1.93.10",
     "com.google.cloud:google-cloud-storage:1.113.4",
+    "io.grpc:grpc-api:1.29.0",
+    "io.grpc:grpc-stub:1.29.0",
 ]

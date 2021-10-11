@@ -6,8 +6,8 @@ java_library(
     name = "grpc",
     licenses = ["permissive"],
     exports = [
-        "@io_grpc_grpc_java//api",
-        "@io_grpc_grpc_java//stub",
+        "@maven//:io_grpc_grpc_stub",
+        "@maven//:io_grpc_grpc_api",
     ],
 )
 
