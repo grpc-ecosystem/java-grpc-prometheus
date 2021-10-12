@@ -7,6 +7,7 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v2
       - name: Lint Java style
         run: |
           wget 'https://github.com/google/google-java-format/releases/download/v1.11.0/google-java-format-1.11.0-all-deps.jar'
