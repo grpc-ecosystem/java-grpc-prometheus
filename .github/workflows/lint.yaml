@@ -1,0 +1,18 @@
+---
+name: Bazel Test
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Lint BUILD files
+        run:
+          -
+
+      - name: Lint Java style
+        run:
+          - wget 'https://github.com/google/google-java-format/releases/download/v1.11.0/google-java-format-1.11.0-all-deps.jar'
+          - chmod +x google-java-format-1.11.0-all-deps.jar
+          - java -jar google-java-format-1.11.0-all-deps.jar
