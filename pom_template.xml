@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>{groupId}</groupId>
+  <artifactId>{artifactId}</artifactId>
+  <version>{version}</version>
+  <packaging>{type}</packaging>
+
+  <organization>
+      <name>me.dinowernli</name>
+  </organization>
+  <name>java-grpc-prometheus</name>
+  <description>Java interceptors which can be used to monitor Grpc services using Prometheus.</description>
+  <url>https://github.com/grpc-ecosystem/java-grpc-prometheus</url>
+
+  <developers>
+    <developer>
+      <id>dino</id>
+      <name>Dino</name>
+    </developer>
+  </developers>
+
+  <scm>
+      <connection>scm:git:git://github.com/grpc-ecosystem/java-grpc-prometheus.git</connection>
+      <developerConnection>scm:git:git://github.com/grpc-ecosystem/java-grpc-prometheus.git</developerConnection>
+      <url>https://github.com/grpc-ecosystem/java-grpc-prometheus</url>
+      <tag>HEAD</tag>
+  </scm>
+
+  <licenses>
+      <license>
+          <name>Apache 2.0 License</name>
+          <url>https://github.com/dinowernli/java-grpc-prometheus/blob/master/LICENSE</url>
+          <distribution>repo</distribution>
+      </license>
+  </licenses>
+
+  <dependencies>
+  {dependencies}
+  </dependencies>
+
+</project>
