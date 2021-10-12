@@ -36,6 +36,8 @@
       </license>
   </licenses>
 
+  <dependencies>
   {dependencies}
+  </dependencies>
 
 </project>
