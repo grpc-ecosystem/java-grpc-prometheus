@@ -2,13 +2,12 @@
 
 package me.dinowernli.grpc.prometheus;
 
-import java.time.Clock;
-import java.time.Instant;
-
 import io.grpc.ClientCall;
 import io.grpc.ForwardingClientCallListener;
 import io.grpc.Metadata;
 import io.grpc.Status;
+import java.time.Clock;
+import java.time.Instant;
 
 class MonitoringClientCallListener<S> extends ForwardingClientCallListener<S> {
   private static final long MILLIS_PER_SECOND = 1000L;
