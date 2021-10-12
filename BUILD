@@ -6,6 +6,7 @@ load("@rules_jvm_external//:defs.bzl", "java_export")
 java_export(
     name = "maven_export_lib",
     maven_coordinates = "me.dinowernli:java-grpc-prometheus:0.5.0",
+    pom_template = "//:pom_template.xml",
     # Make sure these show up in the dependencies of the resulting POM.
     runtime_deps = [
       "//src/main/java/me/dinowernli/grpc/prometheus",
