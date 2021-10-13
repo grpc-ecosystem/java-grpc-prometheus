@@ -1,10 +1,13 @@
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
+GRPC_JAVA_VERSION = "1.29.0"
+GRPC_JAVA_SHA = "446ad7a2e85bbd05406dbf95232c7c49ed90de83b3b60cb2048b0c4c9f254d29"
+
 http_archive(
     name = "io_grpc_grpc_java",
-    sha256 = "446ad7a2e85bbd05406dbf95232c7c49ed90de83b3b60cb2048b0c4c9f254d29",
-    strip_prefix = "grpc-java-1.29.0",
-    url = "https://github.com/grpc/grpc-java/archive/v1.29.0.zip",
+    sha256 = GRPC_JAVA_SHA,
+    strip_prefix = "grpc-java-%s" % GRPC_JAVA_VERSION,
+    url = "https://github.com/grpc/grpc-java/archive/v%s.zip" % GRPC_JAVA_VERSION,
 )
 
 load("@io_grpc_grpc_java//:repositories.bzl", "IO_GRPC_GRPC_JAVA_ARTIFACTS")
@@ -23,7 +26,17 @@ load("@rules_jvm_external//:repositories.bzl", "rules_jvm_external_deps")
 rules_jvm_external_deps()
 
 load("@rules_jvm_external//:defs.bzl", "maven_install")
-load("//:repositories.bzl", "MAVEN_ARTIFACTS")
+
+MAVEN_ARTIFACTS = [
+    "com.google.cloud:google-cloud-core:1.93.10",
+    "com.google.cloud:google-cloud-storage:1.113.4",
+    "com.google.truth:truth:1.0.1",
+    "io.grpc:grpc-api:%s" % GRPC_JAVA_VERSION,
+    "io.grpc:grpc-stub:%s" % GRPC_JAVA_VERSION,
+    "io.prometheus:simpleclient:0.11.0",
+    "junit:junit:4.10",
+    "org.mockito:mockito-all:1.10.19",
+]
 
 maven_install(
     artifacts = MAVEN_ARTIFACTS + IO_GRPC_GRPC_JAVA_ARTIFACTS,
