@@ -2,19 +2,18 @@
 
 package me.dinowernli.grpc.prometheus;
 
-import java.time.Clock;
-import java.time.Instant;
-
 import io.grpc.ForwardingServerCall;
 import io.grpc.Metadata;
 import io.grpc.ServerCall;
 import io.grpc.Status;
+import java.time.Clock;
+import java.time.Instant;
 
 /**
  * A {@link ForwardingServerCall} which updates Prometheus metrics based on the server-side actions
  * taken for a single rpc, e.g., messages sent, latency, etc.
  */
-class MonitoringServerCall<R,S> extends ForwardingServerCall.SimpleForwardingServerCall<R,S> {
+class MonitoringServerCall<R, S> extends ForwardingServerCall.SimpleForwardingServerCall<R, S> {
   private static final long MILLIS_PER_SECOND = 1000L;
 
   private final Clock clock;
@@ -25,7 +24,7 @@ class MonitoringServerCall<R,S> extends ForwardingServerCall.SimpleForwardingSer
   private final Metadata requestMetadata;
 
   MonitoringServerCall(
-      ServerCall<R,S> delegate,
+      ServerCall<R, S> delegate,
       Clock clock,
       GrpcMethod grpcMethod,
       ServerMetrics serverMetrics,

@@ -1,14 +1,12 @@
 package me.dinowernli.grpc.prometheus;
 
-import com.google.common.truth.Truth;
+import static com.google.common.truth.Truth.assertThat;
+
 import io.grpc.Metadata;
 import io.grpc.Metadata.Key;
-import org.junit.Test;
-
 import java.util.Arrays;
 import java.util.List;
-
-import static com.google.common.truth.Truth.assertThat;
+import org.junit.Test;
 
 public class LabelsTest {
 
@@ -33,11 +31,11 @@ public class LabelsTest {
     metadata.put(Key.of("standard", Metadata.ASCII_STRING_MARSHALLER), "standardvalue");
     metadata.put(Key.of("custom2", Metadata.ASCII_STRING_MARSHALLER), "customvalue2");
 
-    List<Key<String>> customKeys = Arrays.asList(
-        Key.of("custom1", Metadata.ASCII_STRING_MARSHALLER),
-        Key.of("custom2", Metadata.ASCII_STRING_MARSHALLER),
-        Key.of("custom3", Metadata.ASCII_STRING_MARSHALLER)
-    );
+    List<Key<String>> customKeys =
+        Arrays.asList(
+            Key.of("custom1", Metadata.ASCII_STRING_MARSHALLER),
+            Key.of("custom2", Metadata.ASCII_STRING_MARSHALLER),
+            Key.of("custom3", Metadata.ASCII_STRING_MARSHALLER));
 
     List<String> actual = Labels.customLabels(metadata, customKeys);
 

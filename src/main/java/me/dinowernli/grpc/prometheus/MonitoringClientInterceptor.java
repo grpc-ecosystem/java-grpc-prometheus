@@ -2,13 +2,12 @@
 
 package me.dinowernli.grpc.prometheus;
 
-import java.time.Clock;
-
 import io.grpc.CallOptions;
 import io.grpc.Channel;
 import io.grpc.ClientCall;
 import io.grpc.ClientInterceptor;
 import io.grpc.MethodDescriptor;
+import java.time.Clock;
 
 /** A {@link ClientInterceptor} which sends stats about incoming grpc calls to Prometheus. */
 public class MonitoringClientInterceptor implements ClientInterceptor {
@@ -22,9 +21,7 @@ public class MonitoringClientInterceptor implements ClientInterceptor {
   }
 
   private MonitoringClientInterceptor(
-      Clock clock,
-      Configuration configuration,
-      ClientMetrics.Factory clientMetricsFactory) {
+      Clock clock, Configuration configuration, ClientMetrics.Factory clientMetricsFactory) {
     this.clock = clock;
     this.configuration = configuration;
     this.clientMetricsFactory = clientMetricsFactory;
@@ -36,10 +33,6 @@ public class MonitoringClientInterceptor implements ClientInterceptor {
     GrpcMethod grpcMethod = GrpcMethod.of(methodDescriptor);
     ClientMetrics metrics = clientMetricsFactory.createMetricsForMethod(grpcMethod);
     return new MonitoringClientCall<>(
-        channel.newCall(methodDescriptor, callOptions),
-        metrics,
-        grpcMethod,
-        configuration,
-        clock);
+        channel.newCall(methodDescriptor, callOptions), metrics, grpcMethod, configuration, clock);
   }
 }

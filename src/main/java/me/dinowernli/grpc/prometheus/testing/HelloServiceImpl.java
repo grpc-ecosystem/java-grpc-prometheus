@@ -5,7 +5,6 @@ package me.dinowernli.grpc.prometheus.testing;
 import com.github.dinowernli.proto.grpc.prometheus.HelloProto.HelloRequest;
 import com.github.dinowernli.proto.grpc.prometheus.HelloProto.HelloResponse;
 import com.github.dinowernli.proto.grpc.prometheus.HelloServiceGrpc.HelloServiceImplBase;
-
 import io.grpc.stub.StreamObserver;
 
 public class HelloServiceImpl extends HelloServiceImplBase {
@@ -24,9 +23,8 @@ public class HelloServiceImpl extends HelloServiceImplBase {
 
   @Override
   public void sayHello(HelloRequest request, StreamObserver<HelloResponse> responseObserver) {
-    responseObserver.onNext(HelloResponse.newBuilder()
-       .setMessage("Hello, " + request.getRecipient())
-       .build());
+    responseObserver.onNext(
+        HelloResponse.newBuilder().setMessage("Hello, " + request.getRecipient()).build());
     responseObserver.onCompleted();
   }
 
@@ -94,8 +92,6 @@ public class HelloServiceImpl extends HelloServiceImplBase {
     if (request.getThrowException()) {
       throw new RuntimeException("I was told to throw!");
     }
-    return HelloResponse.newBuilder()
-        .setMessage("Hello, " + request.getRecipient())
-        .build();
+    return HelloResponse.newBuilder().setMessage("Hello, " + request.getRecipient()).build();
   }
 }

@@ -2,13 +2,12 @@
 
 package me.dinowernli.grpc.prometheus.testing;
 
+import io.prometheus.client.Collector;
+import io.prometheus.client.CollectorRegistry;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
-import io.prometheus.client.Collector;
-import io.prometheus.client.CollectorRegistry;
 
 /** Testing utilities used to deal with {@link CollectorRegistry} instances. */
 public class RegistryHelper {
@@ -27,25 +26,25 @@ public class RegistryHelper {
   public static Collector.MetricFamilySamples findRecordedMetricOrThrow(
       String name, CollectorRegistry collectorRegistry) {
     Optional<Collector.MetricFamilySamples> result = findRecordedMetric(name, collectorRegistry);
-    if (!result.isPresent()){
+    if (!result.isPresent()) {
       throw new IllegalArgumentException("Could not find metric with name: " + name);
     }
     return result.get();
   }
 
-  public static List<String> findRecordedMetricNamesOrThrow(String name, CollectorRegistry collectorRegistry) {
-    return findRecordedMetricOrThrow(name, collectorRegistry)
-            .samples
-            .stream()
-            .map(s -> s.name)
-            .collect(Collectors.toList());
+  public static List<String> findRecordedMetricNamesOrThrow(
+      String name, CollectorRegistry collectorRegistry) {
+    return findRecordedMetricOrThrow(name, collectorRegistry).samples.stream()
+        .map(s -> s.name)
+        .collect(Collectors.toList());
   }
 
   public static double extractMetricValue(String name, CollectorRegistry collectorRegistry) {
     Collector.MetricFamilySamples result = findRecordedMetricOrThrow(name, collectorRegistry);
     if (result.samples.size() != 1) {
-      throw new IllegalArgumentException(String.format(
-          "Expected one value, but got %d for metric %s", result.samples.size(), name));
+      throw new IllegalArgumentException(
+          String.format(
+              "Expected one value, but got %d for metric %s", result.samples.size(), name));
     }
     return result.samples.get(0).value;
   }

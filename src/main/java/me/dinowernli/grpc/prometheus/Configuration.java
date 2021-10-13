@@ -30,8 +30,8 @@ public class Configuration {
   }
 
   /**
-   * Returns a {@link Configuration} for recording all metrics about the rpcs. This includes
-   * metrics which might produce a lot of data, such as latency histograms.
+   * Returns a {@link Configuration} for recording all metrics about the rpcs. This includes metrics
+   * which might produce a lot of data, such as latency histograms.
    */
   public static Configuration allMetrics() {
     return new Configuration(
@@ -42,11 +42,12 @@ public class Configuration {
   }
 
   /**
-   * Returns a copy {@link Configuration} with the difference that Prometheus metrics are
-   * recorded using the supplied {@link CollectorRegistry}.
+   * Returns a copy {@link Configuration} with the difference that Prometheus metrics are recorded
+   * using the supplied {@link CollectorRegistry}.
    */
   public Configuration withCollectorRegistry(CollectorRegistry collectorRegistry) {
-    return new Configuration(isIncludeLatencyHistograms, collectorRegistry, latencyBuckets, labelHeaders);
+    return new Configuration(
+        isIncludeLatencyHistograms, collectorRegistry, latencyBuckets, labelHeaders);
   }
 
   /**
@@ -58,22 +59,25 @@ public class Configuration {
   }
 
   /**
-   * Returns a copy {@link Configuration} that recognizes the given list of header names and uses their value from
-   * each request as prometheus labels.
+   * Returns a copy {@link Configuration} that recognizes the given list of header names and uses
+   * their value from each request as prometheus labels.
    *
-   * Since hyphens is a common character in header names, and since Prometheus does not allow hyphens in label names,
-   * All hyphens in the list of header names will be converted to underscores before being added as metric label names.
+   * <p>Since hyphens is a common character in header names, and since Prometheus does not allow
+   * hyphens in label names, All hyphens in the list of header names will be converted to
+   * underscores before being added as metric label names.
    *
-   * If one of the headers added here is absent in one of the requests, its metric value for that request will be
-   * an empty string.
+   * <p>If one of the headers added here is absent in one of the requests, its metric value for that
+   * request will be an empty string.
    *
-   * Example: {@code withLabelHeaders(Arrays.asList("User-Agent"))} will make all metrics carry a label "User_Agent",
-   * with label value filled in from the value of the "User-Agent" header of each request.
+   * <p>Example: {@code withLabelHeaders(Arrays.asList("User-Agent"))} will make all metrics carry a
+   * label "User_Agent", with label value filled in from the value of the "User-Agent" header of
+   * each request.
    */
   public Configuration withLabelHeaders(List<String> headers) {
     List<String> newHeaders = new ArrayList<>(labelHeaders);
     newHeaders.addAll(headers);
-    return new Configuration(isIncludeLatencyHistograms, collectorRegistry, latencyBuckets, newHeaders);
+    return new Configuration(
+        isIncludeLatencyHistograms, collectorRegistry, latencyBuckets, newHeaders);
   }
 
   /** Returns whether or not latency histograms for calls should be included. */
@@ -96,7 +100,9 @@ public class Configuration {
     return labelHeaders;
   }
 
-  /** Returns the sanitized version of the label headers, after turning all hyphens to underscores. */
+  /**
+   * Returns the sanitized version of the label headers, after turning all hyphens to underscores.
+   */
   public List<String> getSanitizedLabelHeaders() {
     return labelHeaders.stream().map(h -> h.replaceAll("-", "_")).collect(Collectors.toList());
   }
