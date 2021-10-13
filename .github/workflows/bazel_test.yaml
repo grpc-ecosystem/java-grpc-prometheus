@@ -25,4 +25,6 @@ jobs:
         uses: ./.github/actions/install
 
       - name: Run tests
-        run: bazel test //src/...
+        run: |
+          bazel test //src/...
+          bazel build //:maven_export_lib.publish
