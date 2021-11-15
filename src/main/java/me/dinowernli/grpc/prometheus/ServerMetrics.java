@@ -28,8 +28,10 @@ class ServerMetrics {
   private static final List<String> defaultRequestLabels =
       Arrays.asList("grpc_type", "grpc_service", "grpc_method");
 
+  private static final String statusCodeLabel = "grpc_code";
+
   private static final List<String> defaultResponseLabels =
-      Arrays.asList("grpc_type", "grpc_service", "grpc_method", "code", "grpc_code");
+      Arrays.asList("grpc_type", "grpc_service", "grpc_method", "code", statusCodeLabel);
 
   private static final Counter.Builder serverStartedBuilder =
       Counter.build()
@@ -76,6 +78,7 @@ class ServerMetrics {
   private final Counter serverStreamMessagesReceived;
   private final Counter serverStreamMessagesSent;
   private final Optional<Histogram> serverHandledLatencySeconds;
+  private final boolean addCodeLabelToHistograms;
 
   private final GrpcMethod method;
 
@@ -86,7 +89,8 @@ class ServerMetrics {
       Counter serverHandled,
       Counter serverStreamMessagesReceived,
       Counter serverStreamMessagesSent,
-      Optional<Histogram> serverHandledLatencySeconds) {
+      Optional<Histogram> serverHandledLatencySeconds,
+      boolean addCodeLabelToHistograms) {
     this.labelHeaderKeys = labelHeaderKeys;
     this.method = method;
     this.serverStarted = serverStarted;
@@ -94,6 +98,7 @@ class ServerMetrics {
     this.serverStreamMessagesReceived = serverStreamMessagesReceived;
     this.serverStreamMessagesSent = serverStreamMessagesSent;
     this.serverHandledLatencySeconds = serverHandledLatencySeconds;
+    this.addCodeLabelToHistograms = addCodeLabelToHistograms;
   }
 
   public void recordCallStarted(Metadata metadata) {
@@ -121,13 +126,23 @@ class ServerMetrics {
    * Only has any effect if monitoring is configured to include latency histograms. Otherwise, this
    * does nothing.
    */
-  public void recordLatency(double latencySec, Metadata metadata) {
+  public void recordLatency(double latencySec, Metadata metadata, Optional<Code> codeOpt) {
     if (!this.serverHandledLatencySeconds.isPresent()) {
       return;
     }
-    addLabels(
-            this.serverHandledLatencySeconds.get(), customLabels(metadata, labelHeaderKeys), method)
-        .observe(latencySec);
+
+    final List<String> allLabels = new ArrayList<String>();
+    allLabels.addAll(customLabels(metadata, labelHeaderKeys));
+    if (addCodeLabelToHistograms) {
+      allLabels.add(codeOpt.map(c -> c.toString()).orElse(""));
+    }
+
+    addLabels(this.serverHandledLatencySeconds.get(), allLabels, method).observe(latencySec);
+  }
+
+  @Deprecated
+  public void recordLatency(double latencySec, Metadata metadata) {
+    recordLatency(latencySec, metadata, Optional.empty());
   }
 
   /** Knows how to produce {@link ServerMetrics} instances for individual methods. */
@@ -138,6 +153,7 @@ class ServerMetrics {
     private final Counter serverStreamMessagesReceived;
     private final Counter serverStreamMessagesSent;
     private final Optional<Histogram> serverHandledLatencySeconds;
+    private final boolean addCodeLabelToHistograms;
 
     Factory(Configuration configuration) {
       CollectorRegistry registry = configuration.getCollectorRegistry();
@@ -160,15 +176,27 @@ class ServerMetrics {
               .register(registry);
 
       if (configuration.isIncludeLatencyHistograms()) {
+
+        final List<String> labels = new ArrayList<String>();
+        labels.addAll(defaultRequestLabels);
+        labels.addAll(configuration.getSanitizedLabelHeaders());
+        if (configuration.addCodeLabelToHistograms()) {
+          labels.add(statusCodeLabel);
+          this.addCodeLabelToHistograms = true;
+        } else {
+          this.addCodeLabelToHistograms = false;
+        }
+
         this.serverHandledLatencySeconds =
             Optional.of(
                 serverHandledLatencySecondsBuilder
                     .buckets(configuration.getLatencyBuckets())
-                    .labelNames(
-                        asArray(defaultRequestLabels, configuration.getSanitizedLabelHeaders()))
+                    .labelNames(labels.toArray(new String[0]))
                     .register(registry));
+
       } else {
         this.serverHandledLatencySeconds = Optional.empty();
+        this.addCodeLabelToHistograms = false;
       }
     }
 
@@ -181,7 +209,8 @@ class ServerMetrics {
           serverHandled,
           serverStreamMessagesReceived,
           serverStreamMessagesSent,
-          serverHandledLatencySeconds);
+          serverHandledLatencySeconds,
+          addCodeLabelToHistograms);
     }
   }
 }
