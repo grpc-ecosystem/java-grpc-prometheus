@@ -19,7 +19,7 @@ public class Configuration {
   private final CollectorRegistry collectorRegistry;
   private final double[] latencyBuckets;
   private final List<String> labelHeaders;
-  private final boolean addCodeLabelToHistograms;
+  private final boolean isAddCodeLabelToHistograms;
 
   /** Returns a {@link Configuration} for recording all cheap metrics about the rpcs. */
   public static Configuration cheapMetricsOnly() {
@@ -28,7 +28,7 @@ public class Configuration {
         CollectorRegistry.defaultRegistry,
         DEFAULT_LATENCY_BUCKETS,
         new ArrayList<>(),
-        false);
+        false); /* isAddCodeLabelToHistograms */
   }
 
   /**
@@ -54,7 +54,7 @@ public class Configuration {
         collectorRegistry,
         latencyBuckets,
         labelHeaders,
-        addCodeLabelToHistograms);
+        isAddCodeLabelToHistograms);
   }
 
   /**
@@ -67,7 +67,7 @@ public class Configuration {
         collectorRegistry,
         buckets,
         labelHeaders,
-        addCodeLabelToHistograms);
+        isAddCodeLabelToHistograms);
   }
 
   /**
@@ -93,21 +93,19 @@ public class Configuration {
         collectorRegistry,
         latencyBuckets,
         newHeaders,
-        addCodeLabelToHistograms);
+        isAddCodeLabelToHistograms);
   }
 
   /**
    * Returns a copy {@link Configuration} with the difference that status code label will be added
-   * to latency histogram. If latency histogram itself is disabled, this takes no effect.
+   * to latency histogram. If latency histogram itself is disabled, this takes no effect. Warning:
+   * this will increase the number of histograms by a factor of actually happened codes (up to
+   * {@link io.grpc.Status.Code} values count), which could lead to additional load on prometheus
+   * (storage and memory usage, query-time complexity)
    */
   public Configuration withCodeLabelInLatencyHistogram() {
     return new Configuration(
-        isIncludeLatencyHistograms,
-        collectorRegistry,
-        latencyBuckets,
-        labelHeaders,
-        // addCodeLabelToHistograms: set true only if isIncludeLatencyHistograms is also true
-        isIncludeLatencyHistograms);
+        isIncludeLatencyHistograms, collectorRegistry, latencyBuckets, labelHeaders, true);
   }
 
   /** Returns whether or not latency histograms for calls should be included. */
@@ -131,8 +129,8 @@ public class Configuration {
   }
 
   /** Returns whether or not status code label should be added to latency histogram. */
-  public boolean addCodeLabelToHistograms() {
-    return addCodeLabelToHistograms;
+  public boolean isAddCodeLabelToHistograms() {
+    return isAddCodeLabelToHistograms;
   }
 
   /**
@@ -147,11 +145,11 @@ public class Configuration {
       CollectorRegistry collectorRegistry,
       double[] latencyBuckets,
       List<String> labelHeaders,
-      boolean addCodeLabelToHistograms) {
+      boolean isAddCodeLabelToHistograms) {
     this.isIncludeLatencyHistograms = isIncludeLatencyHistograms;
     this.collectorRegistry = collectorRegistry;
     this.latencyBuckets = latencyBuckets;
     this.labelHeaders = labelHeaders;
-    this.addCodeLabelToHistograms = addCodeLabelToHistograms;
+    this.isAddCodeLabelToHistograms = isAddCodeLabelToHistograms;
   }
 }

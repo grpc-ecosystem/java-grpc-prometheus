@@ -8,7 +8,6 @@ import io.grpc.ServerCall;
 import io.grpc.Status;
 import java.time.Clock;
 import java.time.Instant;
-import java.util.Optional;
 
 /**
  * A {@link ForwardingServerCall} which updates Prometheus metrics based on the server-side actions
@@ -62,12 +61,12 @@ class MonitoringServerCall<R, S> extends ForwardingServerCall.SimpleForwardingSe
   }
 
   private void reportEndMetrics(Status status) {
-    final Status.Code code = status.getCode();
+    Status.Code code = status.getCode();
     serverMetrics.recordServerHandled(code, requestMetadata);
     if (configuration.isIncludeLatencyHistograms()) {
       double latencySec =
           (clock.millis() - startInstant.toEpochMilli()) / (double) MILLIS_PER_SECOND;
-      serverMetrics.recordLatency(latencySec, requestMetadata, Optional.of(code));
+      serverMetrics.recordLatency(latencySec, requestMetadata, code);
     }
   }
 }
