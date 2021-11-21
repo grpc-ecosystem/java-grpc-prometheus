@@ -100,8 +100,8 @@ public class Configuration {
    * Returns a copy {@link Configuration} with the difference that status code label will be added
    * to latency histogram. If latency histogram itself is disabled, this takes no effect. Warning:
    * this will increase the number of histograms by a factor of actually happened codes (up to
-   * {@link io.grpc.Status.Code} values count), which could lead to additional load on prometheus
-   * (storage and memory usage, query-time complexity)
+   * {@link io.grpc.Status.Code} values count), which could lead to additional local memory usage
+   * and load on prometheus (storage and memory usage, query-time complexity)
    */
   public Configuration withCodeLabelInLatencyHistogram() {
     return new Configuration(
