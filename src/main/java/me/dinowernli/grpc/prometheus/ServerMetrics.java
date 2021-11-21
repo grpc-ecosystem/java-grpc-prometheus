@@ -28,10 +28,10 @@ class ServerMetrics {
   private static final List<String> defaultRequestLabels =
       Arrays.asList("grpc_type", "grpc_service", "grpc_method");
 
-  private static final String statusCodeLabel = "grpc_code";
+  private static final String STATUS_CODE_LABEL = "grpc_code";
 
   private static final List<String> defaultResponseLabels =
-      Arrays.asList("grpc_type", "grpc_service", "grpc_method", "code", statusCodeLabel);
+      Arrays.asList("grpc_type", "grpc_service", "grpc_method", "code", STATUS_CODE_LABEL);
 
   private static final Counter.Builder serverStartedBuilder =
       Counter.build()
@@ -177,7 +177,7 @@ class ServerMetrics {
         labels.addAll(configuration.getSanitizedLabelHeaders());
 
         if (configuration.isAddCodeLabelToHistograms()) {
-          labels.add(statusCodeLabel);
+          labels.add(STATUS_CODE_LABEL);
         }
         this.isAddCodeLabelToHistograms = configuration.isAddCodeLabelToHistograms();
 

@@ -259,7 +259,8 @@ public class MonitoringServerInterceptorIntegrationTest {
 
   @Test
   public void addsStatusCodeLabel() throws Throwable {
-    startGrpcServer(ALL_METRICS.withCodeLabelInLatencyHistogram());
+    double[] buckets = new double[] {10.0};
+    startGrpcServer(ALL_METRICS.withCodeLabelInLatencyHistogram().withLatencyBuckets(buckets));
     createGrpcBlockingStub().sayHello(REQUEST);
 
     MetricFamilySamples.Sample sample =
@@ -269,6 +270,13 @@ public class MonitoringServerInterceptorIntegrationTest {
 
     assertThat(sample.labelNames)
         .containsExactly("grpc_type", "grpc_service", "grpc_method", "grpc_code", "le");
+    assertThat(sample.labelValues)
+        .containsExactly(
+            "UNARY",
+            HelloServiceImpl.SERVICE_NAME,
+            HelloServiceImpl.UNARY_METHOD_NAME,
+            "OK",
+            "10.0");
   }
 
   @Test

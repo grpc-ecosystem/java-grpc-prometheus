@@ -28,7 +28,7 @@ public class Configuration {
         CollectorRegistry.defaultRegistry,
         DEFAULT_LATENCY_BUCKETS,
         new ArrayList<>(),
-        false); /* isAddCodeLabelToHistograms */
+        false /* isAddCodeLabelToHistograms */);
   }
 
   /**
@@ -105,7 +105,11 @@ public class Configuration {
    */
   public Configuration withCodeLabelInLatencyHistogram() {
     return new Configuration(
-        isIncludeLatencyHistograms, collectorRegistry, latencyBuckets, labelHeaders, true);
+        isIncludeLatencyHistograms,
+        collectorRegistry,
+        latencyBuckets,
+        labelHeaders,
+        true /* isAddCodeLabelToHistograms */);
   }
 
   /** Returns whether or not latency histograms for calls should be included. */
