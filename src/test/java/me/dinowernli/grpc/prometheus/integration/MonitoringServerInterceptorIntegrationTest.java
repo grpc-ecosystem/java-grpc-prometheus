@@ -259,7 +259,7 @@ public class MonitoringServerInterceptorIntegrationTest {
 
   @Test
   public void addsStatusCodeLabel() throws Throwable {
-    double[] buckets = new double[] {10.0};
+    double[] buckets = new double[] {8.0, 9.0, 10.0};
     startGrpcServer(ALL_METRICS.withCodeLabelInLatencyHistogram().withLatencyBuckets(buckets));
     createGrpcBlockingStub().sayHello(REQUEST);
 
@@ -276,7 +276,7 @@ public class MonitoringServerInterceptorIntegrationTest {
             HelloServiceImpl.SERVICE_NAME,
             HelloServiceImpl.UNARY_METHOD_NAME,
             "OK",
-            "10.0");
+            "8.0");
   }
 
   @Test
