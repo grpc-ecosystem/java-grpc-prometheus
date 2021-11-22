@@ -248,6 +248,35 @@ public class MonitoringServerInterceptorIntegrationTest {
                 "grpc_server_handled_latency_seconds",
                 "grpc_server_handled_latency_seconds_bucket"))
         .isEqualTo(expectedNum);
+
+    MetricFamilySamples.Sample sample =
+        getSample(
+            findRecordedMetricOrThrow("grpc_server_handled_latency_seconds"),
+            "grpc_server_handled_latency_seconds_bucket");
+
+    assertThat(sample.labelNames).containsExactly("grpc_type", "grpc_service", "grpc_method", "le");
+  }
+
+  @Test
+  public void addsStatusCodeLabel() throws Throwable {
+    double[] buckets = new double[] {8.0, 9.0, 10.0};
+    startGrpcServer(ALL_METRICS.withCodeLabelInLatencyHistogram().withLatencyBuckets(buckets));
+    createGrpcBlockingStub().sayHello(REQUEST);
+
+    MetricFamilySamples.Sample sample =
+        getSample(
+            findRecordedMetricOrThrow("grpc_server_handled_latency_seconds"),
+            "grpc_server_handled_latency_seconds_bucket");
+
+    assertThat(sample.labelNames)
+        .containsExactly("grpc_type", "grpc_service", "grpc_method", "grpc_code", "le");
+    assertThat(sample.labelValues)
+        .containsExactly(
+            "UNARY",
+            HelloServiceImpl.SERVICE_NAME,
+            HelloServiceImpl.UNARY_METHOD_NAME,
+            "OK",
+            "8.0");
   }
 
   @Test
