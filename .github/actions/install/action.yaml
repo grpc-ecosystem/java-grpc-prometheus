@@ -6,13 +6,13 @@ runs:
     - name: Install Bazel (linux)
       run: |
         if [ "$RUNNER_OS" == "macOS" ]; then
-          curl -L -O "https://github.com/bazelbuild/bazel/releases/download/4.2.1/bazel-4.2.1-installer-darwin-x86_64.sh"
-          chmod a+x ./bazel-4.2.1-installer-darwin-x86_64.sh
-          ./bazel-4.2.1-installer-darwin-x86_64.sh
+          curl -L -O "https://github.com/bazelbuild/bazel/releases/download/5.3.2/bazel-5.3.2-installer-darwin-x86_64.sh"
+          chmod a+x ./bazel-5.3.2-installer-darwin-x86_64.sh
+          ./bazel-5.3.2-installer-darwin-x86_64.sh
         elif [ "$RUNNER_OS" == "Linux" ]; then
-          wget 'https://github.com/bazelbuild/bazel/releases/download/4.2.1/bazel_4.2.1-linux-x86_64.deb'
-          chmod +x bazel_4.2.1-linux-x86_64.deb
-          sudo dpkg -i bazel_4.2.1-linux-x86_64.deb
+          wget 'https://github.com/bazelbuild/bazel/releases/download/5.3.2/bazel_5.3.2-linux-x86_64.deb'
+          chmod +x bazel_5.3.2-linux-x86_64.deb
+          sudo dpkg -i bazel_5.3.2-linux-x86_64.deb
         else
           echo 'Unrecognized OS'
         fi

@@ -26,5 +26,5 @@ jobs:
 
       - name: Run tests
         run: |
-          bazel test //src/...
+          bazel test //src/... --incompatible_java_common_parameters=false
           bazel build //:maven_export_lib.publish
