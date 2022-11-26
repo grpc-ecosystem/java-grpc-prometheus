@@ -12,7 +12,7 @@ runs:
           chmod a+x ./bazel-$BAZEL_VERSION-installer-darwin-x86_64.sh
           ./bazel-$BAZEL_VERSION-installer-darwin-x86_64.sh
         elif [ "$RUNNER_OS" == "Linux" ]; then
-          wget 'https://github.com/bazelbuild/bazel/releases/download/$BAZEL_VERSION/bazel_$BAZEL_VERSION-linux-x86_64.deb'
+          wget "https://github.com/bazelbuild/bazel/releases/download/$BAZEL_VERSION/bazel_$BAZEL_VERSION-linux-x86_64.deb"
           chmod +x bazel_$BAZEL_VERSION-linux-x86_64.deb
           sudo dpkg -i bazel_$BAZEL_VERSION-linux-x86_64.deb
         else
