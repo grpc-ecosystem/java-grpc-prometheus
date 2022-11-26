@@ -1,18 +1,20 @@
 ---
 name: Install
+env:
+  BAZEL_VERSION: 5.3.2
 runs:
   using: composite
   steps:
     - name: Install Bazel (linux)
       run: |
         if [ "$RUNNER_OS" == "macOS" ]; then
-          curl -L -O "https://github.com/bazelbuild/bazel/releases/download/5.3.2/bazel-5.3.2-installer-darwin-x86_64.sh"
-          chmod a+x ./bazel-5.3.2-installer-darwin-x86_64.sh
-          ./bazel-5.3.2-installer-darwin-x86_64.sh
+          curl -L -O "https://github.com/bazelbuild/bazel/releases/download/$BAZEL_VERSION/bazel-$BAZEL_VERSION-installer-darwin-x86_64.sh"
+          chmod a+x ./bazel-$BAZEL_VERSION-installer-darwin-x86_64.sh
+          ./bazel-$BAZEL_VERSION-installer-darwin-x86_64.sh
         elif [ "$RUNNER_OS" == "Linux" ]; then
-          wget 'https://github.com/bazelbuild/bazel/releases/download/5.3.2/bazel_5.3.2-linux-x86_64.deb'
-          chmod +x bazel_5.3.2-linux-x86_64.deb
-          sudo dpkg -i bazel_5.3.2-linux-x86_64.deb
+          wget 'https://github.com/bazelbuild/bazel/releases/download/$BAZEL_VERSION/bazel_$BAZEL_VERSION-linux-x86_64.deb'
+          chmod +x bazel_$BAZEL_VERSION-linux-x86_64.deb
+          sudo dpkg -i bazel_$BAZEL_VERSION-linux-x86_64.deb
         else
           echo 'Unrecognized OS'
         fi
