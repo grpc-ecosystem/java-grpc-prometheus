@@ -1,11 +1,9 @@
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
-GRPC_JAVA_VERSION = "1.29.0"
-GRPC_JAVA_SHA = "446ad7a2e85bbd05406dbf95232c7c49ed90de83b3b60cb2048b0c4c9f254d29"
+GRPC_JAVA_VERSION = "1.51.0"
 
 http_archive(
     name = "io_grpc_grpc_java",
-    sha256 = GRPC_JAVA_SHA,
     strip_prefix = "grpc-java-%s" % GRPC_JAVA_VERSION,
     url = "https://github.com/grpc/grpc-java/archive/v%s.zip" % GRPC_JAVA_VERSION,
 )
