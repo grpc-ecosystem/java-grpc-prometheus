@@ -1,13 +1,12 @@
 ---
 name: Install
-env:
-  BAZEL_VERSION: 5.3.2
 runs:
   using: composite
   steps:
     - name: Install Bazel (linux)
       shell: bash
       run: |
+        BAZEL_VERSION=5.3.2
         if [ "$RUNNER_OS" == "macOS" ]; then
           curl -L -O "https://github.com/bazelbuild/bazel/releases/download/$BAZEL_VERSION/bazel-$BAZEL_VERSION-installer-darwin-x86_64.sh"
           chmod a+x ./bazel-$BAZEL_VERSION-installer-darwin-x86_64.sh
@@ -19,5 +18,4 @@ runs:
         else
           echo 'Unrecognized OS'
         fi
-      shell: bash
 
