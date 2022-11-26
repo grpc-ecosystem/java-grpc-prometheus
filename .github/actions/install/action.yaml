@@ -6,6 +6,7 @@ runs:
   using: composite
   steps:
     - name: Install Bazel (linux)
+      shell: bash
       run: |
         if [ "$RUNNER_OS" == "macOS" ]; then
           curl -L -O "https://github.com/bazelbuild/bazel/releases/download/$BAZEL_VERSION/bazel-$BAZEL_VERSION-installer-darwin-x86_64.sh"
