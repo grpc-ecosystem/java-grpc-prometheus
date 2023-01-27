@@ -41,8 +41,13 @@ me.dinowernli:java-grpc-prometheus:0.3.0
 In order to attach the monitoring server interceptor to your gRPC server, you can do the following:
 
 ```java
+CollectorRegistry collectorRegistry = new CollectorRegistry();
 MonitoringServerInterceptor monitoringInterceptor = 
-    MonitoringServerInterceptor.create(Configuration.cheapMetricsOnly());
+    MonitoringServerInterceptor.create(
+        Configuration
+            .cheapMetricsOnly()
+            .withCollectorRegistry(collectorRegistry)
+    );
 grpcServer = ServerBuilder.forPort(GRPC_PORT)
     .addService(ServerInterceptors.intercept(
         HelloServiceGrpc.bindService(new HelloServiceImpl()), monitoringInterceptor))
@@ -52,8 +57,13 @@ grpcServer = ServerBuilder.forPort(GRPC_PORT)
 In order to attach the monitoring client interceptor to your gRPC client, you can do the following:
 
 ```java
+CollectorRegistry collectorRegistry = new CollectorRegistry();
 MonitoringClientInterceptor monitoringInterceptor =
-    MonitoringClientInterceptor.create(Configuration.cheapMetricsOnly());
+    MonitoringClientInterceptor.create(
+        Configuration
+            .cheapMetricsOnly()
+            .withCollectorRegistry(collectorRegistry)
+    );
 grpcStub = HelloServiceGrpc.newStub(NettyChannelBuilder.forAddress(REMOTE_HOST, GRPC_PORT)
     .intercept(monitoringInterceptor)
     .build());
@@ -64,11 +74,13 @@ produced metrics, you can do the following, which will cause the metrics to carr
 value is filled from the header value on each request: 
 
 ```java
+CollectorRegistry collectorRegistry = new CollectorRegistry();
 MonitoringServerInterceptor monitoringInterceptor = 
     MonitoringServerInterceptor.create(
         Configuration
             .cheapMetricsOnly()
-            .withLabelHeaders(Arrays.asList("header-1"))
+            .withLabelHeaders(Arrays.asList("header-1")
+            .withCollectorRegistry(collectorRegistry))
     );
 grpcServer = ServerBuilder.forPort(GRPC_PORT)
     .addService(ServerInterceptors.intercept(
