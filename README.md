@@ -41,7 +41,7 @@ me.dinowernli:java-grpc-prometheus:0.3.0
 In order to attach the monitoring server interceptor to your gRPC server, you can do the following:
 
 ```java
-MonitoringServerInterceptor monitoringInterceptor = 
+MonitoringServerInterceptor monitoringInterceptor =
     MonitoringServerInterceptor.create(Configuration.cheapMetricsOnly());
 grpcServer = ServerBuilder.forPort(GRPC_PORT)
     .addService(ServerInterceptors.intercept(
@@ -59,8 +59,26 @@ grpcStub = HelloServiceGrpc.newStub(NettyChannelBuilder.forAddress(REMOTE_HOST, 
     .build());
 ```
 
-In order to attach the monitoring server interceptor to your gRPC server with a custom collector registry,
-you can do the following:
+If you want to instruct the interceptor to use a specific header of interest, for example "header-1" as a label on all
+produced metrics, you can do the following, which will cause the metrics to carry an extra label "header_1" whose
+value is filled from the header value on each request: 
+
+```java
+MonitoringServerInterceptor monitoringInterceptor =
+    MonitoringServerInterceptor.create(
+        Configuration
+            .cheapMetricsOnly()
+            .withLabelHeaders(Arrays.asList("header-1"))
+    );
+grpcServer = ServerBuilder.forPort(GRPC_PORT)
+    .addService(ServerInterceptors.intercept(
+        HelloServiceGrpc.bindService(new HelloServiceImpl()), monitoringInterceptor))
+    .build();
+```
+
+### Custom CollectorRegistry
+
+In order to attach the monitoring server interceptor to your gRPC server with a custom collector registry, you can do the following:
 
 ```java
 CollectorRegistry collectorRegistry = new CollectorRegistry();
@@ -73,8 +91,7 @@ grpcServer = ServerBuilder.forPort(GRPC_PORT)
     .build();
 ```
 
-In order to attach the monitoring client interceptor to your gRPC client with a custom collector registry,
-you can do the following:
+In order to attach the monitoring client interceptor to your gRPC client with a custom collector registry, you can do the following:
 
 ```java
 CollectorRegistry collectorRegistry = new CollectorRegistry();
@@ -85,24 +102,6 @@ grpcStub = HelloServiceGrpc.newStub(NettyChannelBuilder.forAddress(REMOTE_HOST, 
     .intercept(monitoringInterceptor)
     .build());
 ```
-
-If you want to instruct the interceptor to use a specific header of interest, for example "header-1" as a label on all
-produced metrics, you can do the following, which will cause the metrics to carry an extra label "header_1" whose
-value is filled from the header value on each request: 
-
-```java
-MonitoringServerInterceptor monitoringInterceptor = 
-    MonitoringServerInterceptor.create(
-        Configuration
-            .cheapMetricsOnly()
-            .withLabelHeaders(Arrays.asList("header-1"))
-    );
-grpcServer = ServerBuilder.forPort(GRPC_PORT)
-    .addService(ServerInterceptors.intercept(
-        HelloServiceGrpc.bindService(new HelloServiceImpl()), monitoringInterceptor))
-    .build();
-```
-
 
 If you're using Spring Boot 2 with micrometer-registry-prometheus you should inject the CollectorRegistry that is already provided in the application context:
 
