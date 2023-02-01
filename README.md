@@ -80,8 +80,7 @@ you can do the following:
 CollectorRegistry collectorRegistry = new CollectorRegistry();
 MonitoringClientInterceptor monitoringInterceptor =
     MonitoringClientInterceptor.create(
-        Configuration.cheapMetricsOnly().withCollectorRegistry(collectorRegistry)
-    );
+        Configuration.cheapMetricsOnly().withCollectorRegistry(collectorRegistry));
 grpcStub = HelloServiceGrpc.newStub(NettyChannelBuilder.forAddress(REMOTE_HOST, GRPC_PORT)
     .intercept(monitoringInterceptor)
     .build());
