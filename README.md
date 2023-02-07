@@ -41,7 +41,7 @@ me.dinowernli:java-grpc-prometheus:0.3.0
 In order to attach the monitoring server interceptor to your gRPC server, you can do the following:
 
 ```java
-MonitoringServerInterceptor monitoringInterceptor = 
+MonitoringServerInterceptor monitoringInterceptor =
     MonitoringServerInterceptor.create(Configuration.cheapMetricsOnly());
 grpcServer = ServerBuilder.forPort(GRPC_PORT)
     .addService(ServerInterceptors.intercept(
@@ -64,7 +64,7 @@ produced metrics, you can do the following, which will cause the metrics to carr
 value is filled from the header value on each request: 
 
 ```java
-MonitoringServerInterceptor monitoringInterceptor = 
+MonitoringServerInterceptor monitoringInterceptor =
     MonitoringServerInterceptor.create(
         Configuration
             .cheapMetricsOnly()
@@ -76,6 +76,32 @@ grpcServer = ServerBuilder.forPort(GRPC_PORT)
     .build();
 ```
 
+### Custom CollectorRegistry
+
+In order to attach the monitoring server interceptor to your gRPC server with a custom collector registry, you can do the following:
+
+```java
+CollectorRegistry collectorRegistry = new CollectorRegistry();
+MonitoringServerInterceptor monitoringInterceptor =
+    MonitoringServerInterceptor.create(
+        Configuration.cheapMetricsOnly().withCollectorRegistry(collectorRegistry));
+grpcServer = ServerBuilder.forPort(GRPC_PORT)
+    .addService(ServerInterceptors.intercept(
+        HelloServiceGrpc.bindService(new HelloServiceImpl()), monitoringInterceptor))
+    .build();
+```
+
+In order to attach the monitoring client interceptor to your gRPC client with a custom collector registry, you can do the following:
+
+```java
+CollectorRegistry collectorRegistry = new CollectorRegistry();
+MonitoringClientInterceptor monitoringInterceptor =
+    MonitoringClientInterceptor.create(
+        Configuration.cheapMetricsOnly().withCollectorRegistry(collectorRegistry));
+grpcStub = HelloServiceGrpc.newStub(NettyChannelBuilder.forAddress(REMOTE_HOST, GRPC_PORT)
+    .intercept(monitoringInterceptor)
+    .build());
+```
 
 If you're using Spring Boot 2 with micrometer-registry-prometheus you should inject the CollectorRegistry that is already provided in the application context:
 
